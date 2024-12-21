@@ -1,0 +1,13 @@
+<h1>Update Status for {{ agent.name }}</h1>
+<form method="post">
+    {% csrf_token %}
+    <label for="status">Status:</label>
+    <select name="status" id="status">
+        {% for value, display in agent.STATUS_CHOICES %}
+        <option value="{{ value }}" {% if agent.status == value %}selected{% endif %}>
+            {{ display }}
+        </option>
+        {% endfor %}
+    </select>
+    <button type="submit">Update</button>
+</form>

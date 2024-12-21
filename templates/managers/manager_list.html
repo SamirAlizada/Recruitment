@@ -1,0 +1,9 @@
+<h1>Managers</h1>
+<ul>
+    {% for manager in managers %}
+    <li>
+        <a href="{% url 'manager_detail' manager.id %}">{{ manager.name }}</a>
+    </li>
+    {% endfor %}
+</ul>
+<a href="{% url 'agent_list' %}">Back to Agents</a>

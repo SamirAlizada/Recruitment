@@ -1,0 +1,44 @@
+<h1>Edit Agent: {{ agent.name }} {{ agent.surname }}</h1>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <div id="manager-selection" style="display: none;">
+        <label for="manager">Select Manager:</label>
+        <select name="manager" id="manager">
+            {% for manager in managers %}
+            <option value="{{ manager.id }}">{{ manager.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit">Save Changes</button>
+</form>
+<a href="{% url 'agent_list' %}">Back to Agent List</a>
+
+<script>
+    const statusField = document.querySelector('#id_status');
+    const managerSelection = document.querySelector('#manager-selection');
+
+    // Status dəyişəndə yoxla və manager seçimini göstər
+    statusField.addEventListener('change', function () {
+        if (
+            this.value === 'Passed to Training' ||
+            this.value === 'Invited to Work' ||
+            this.value === 'Failed to Work'
+        ) {
+            managerSelection.style.display = 'block';
+        } else {
+            managerSelection.style.display = 'none';
+        }
+    });
+
+    // İlk açılışda statusu yoxla
+    if (
+        statusField.value === 'Passed to Training' ||
+        statusField.value === 'Invited to Work' ||
+        statusField.value === 'Failed to Work'
+    ) {
+        managerSelection.style.display = 'block';
+    } else {
+        managerSelection.style.display = 'none';
+    }
+</script>
