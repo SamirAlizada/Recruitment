@@ -1,3 +1,20 @@
+<style>
+    .photo-container {
+    position: relative;
+    display: inline-block;
+}
+
+.agent-photo {
+    transition: transform 0.3s ease;
+}
+
+.agent-photo:hover {
+    transform: scale(4);
+    position: absolute;
+    z-index: 1000;
+}
+</style>
+
 <h1>Agent List</h1>
 <table>
     <thead>
@@ -16,7 +33,9 @@
         <tr>
             <td>
                 {% if agent.photo %}
-                <img src="{{ agent.photo.url }}" alt="Photo" width="50">
+                <div class="photo-container">
+                    <img src="{{ agent.photo.url }}" alt="Photo" width="50" class="agent-photo">
+                </div>
                 {% else %}
                 No Photo
                 {% endif %}
