@@ -4,6 +4,7 @@ from django.shortcuts import render
 from .models import Agent, Group, Manager
 from django.shortcuts import redirect, get_object_or_404, render
 from .forms import AgentForm
+from datetime import datetime, timedelta
 
 @login_required
 def agent_list(request):
@@ -63,7 +64,23 @@ def group_list(request):
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)  # Seçilən qrupu tap
     agents = Agent.objects.filter(group=group)  # Qrupdakı agentləri gətir
-    return render(request, 'groups/group_detail.html', {'group': group, 'agents': agents})
+    days = ['I', 'II', 'III', 'IV', 'V']
+    
+    # Cari həftənin başlanğıc və son tarixlərini hesablayaq
+    today = datetime.now()
+    monday = today - timedelta(days=today.weekday())  # Həftənin ilk günü
+    friday = monday + timedelta(days=4)  # Həftənin son günü
+    
+    # Hər günün tarixini saxlayaq
+    week_dates = [(monday + timedelta(days=i)).date() for i in range(5)]
+    
+    return render(request, 'groups/group_detail.html', {
+        'group': group, 'agents': agents, 'days': days,
+        'week_start': monday.date(),
+        'week_end': friday.date(),
+        'week_dates': week_dates,
+        'current_date': today.date(),
+        })
 
 def manager_list(request):
     managers = Manager.objects.all()  # Bütün qrupları gətir
