@@ -9,6 +9,7 @@ class Group(models.Model):
 class Manager(models.Model):
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50)
+    department = models.CharField(max_length=100, null=True)
 
     def __str__(self):
         return self.name
