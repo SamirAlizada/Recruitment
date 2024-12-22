@@ -1,33 +1,54 @@
-<h1>Group: {{ group.name }}</h1>
-<h2>Agents in this group:</h2>
-<table style="width: 100%; border-collapse: collapse;">
-    <thead>
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 8px;">Photo</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Surname</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Status</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for agent in agents %}
-        <tr>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-                <img src="{{ agent.photo.url }}" alt="{{ agent.name }}" style="width: 50px; height: 50px; border-radius: 50%;">
-            </td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ agent.name }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ agent.surname }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ agent.get_status_display }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-                <a href="{% url 'edit_agent' agent.id %}" style="color: #fff; background-color: #007bff; padding: 5px 10px; text-decoration: none; border-radius: 5px;">Edit</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No agents in this group.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<a href="{% url 'group_list' %}" style="margin-top: 20px; display: inline-block;">Back to Groups</a>
+<div class="container" style="padding: 20px; max-width: 1200px; margin: 0 auto; overflow: visible;">
+    <h1 style="color: #2c3e50; margin-bottom: 30px; font-size: 2.2em; border-bottom: 2px solid #3498db; padding-bottom: 10px;">
+        Group: {{ group.name }}
+    </h1>
+
+    <div style="text-align: center; margin-bottom: 20px; font-size: 1.2em; color: #34495e;">
+        {{ week_start|date:"d" }} - {{ week_end|date:"d F" }}
+    </div>
+
+    <h2 style="color: #34495e; margin-bottom: 20px; font-size: 1.5em;">Agents in this group:</h2>
+
+    <div style="background-color: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: visible;">
+        <table style="width: 100%; border-collapse: separate; border-spacing: 0; border-radius: 8px; overflow: visible;">
+            <thead>
+                <tr style="background-color: #3498db; color: white;">
+                    <th style="padding: 12px; text-align: left; min-width: 250px;">Agent</th>
+                    {% for day in days %}
+                    <th style="padding: 12px; text-align: center;">{{ day }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for agent in agents %}
+                <tr style="{% if forloop.counter|divisibleby:2 %}background-color: #f8f9fa{% else %}background-color: white{% endif %};">
+                    <td style="padding: 12px; border: 1px solid #dee2e6; overflow: visible;">
+                        <div style="display: flex; align-items: center; gap: 10px; position: relative; overflow: visible;">
+                            <img src="{{ agent.photo.url }}" alt="{{ agent.name }}" 
+                                 style="width: 40px; height: 40px; border-radius: 50%; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.1); transition: transform 0.3s ease;" 
+                                 onmouseover="this.style.transform='scale(3)'; this.style.zIndex='9999';" 
+                                 onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
+                            <span>{{ agent.name }} {{ agent.surname }}</span>
+                        </div>
+                    </td>
+                    {% for date in week_dates %}
+                    <td style="padding: 12px; border: 1px solid #dee2e6;">
+                        <select style="width: 100%; padding: 8px; border: 1px solid #ced4da; border-radius: 4px; background-color: white; font-size: 14px; color: #495057; cursor: pointer; transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;"
+                                {% if date < current_date %}disabled{% endif %}>
+                            <option value="">Seçiniz</option>
+                            <option value="i">i</option>
+                            <option value="e">e</option>
+                            <option value="qb">qb</option>
+                        </select>
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <a href="{% url 'group_list' %}" style="display: inline-block; margin-top: 30px; padding: 10px 20px; background-color: #3498db; color: white; text-decoration: none; border-radius: 5px; transition: background-color 0.3s;">
+        Back to Groups
+    </a>
+</div>
