@@ -1,33 +1,50 @@
-<h1>Manager: {{ manager.name }}</h1>
-<h2>Agents in this Manager:</h2>
-<table style="width: 100%; border-collapse: collapse;">
-    <thead>
-        <tr>
-            <th style="border: 1px solid #ddd; padding: 8px;">Photo</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Name</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Surname</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Status</th>
-            <th style="border: 1px solid #ddd; padding: 8px;">Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for agent in agents %}
-        <tr>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-                <img src="{{ agent.photo.url }}" alt="{{ agent.name }}" style="width: 50px; height: 50px; border-radius: 50%;">
-            </td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ agent.name }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ agent.surname }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px;">{{ agent.get_status_display }}</td>
-            <td style="border: 1px solid #ddd; padding: 8px; text-align: center;">
-                <a href="{% url 'edit_agent' agent.id %}" style="color: #fff; background-color: #007bff; padding: 5px 10px; text-decoration: none; border-radius: 5px;">Edit</a>
-            </td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" style="border: 1px solid #ddd; padding: 8px; text-align: center;">No agents in this manager.</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<a href="{% url 'manager_list' %}" style="margin-top: 20px; display: inline-block;">Back to Managers</a>
+{% extends 'base.html' %}
+
+{% block title %}{{ manager.name }} - Yönetici Detayı{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Yönetici: {{ manager.name }}</h1>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Fotoğraf</th>
+                            <th>Ad</th>
+                            <th>Soyad</th>
+                            <th>Durum</th>
+                            <th>İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for agent in agents %}
+                        <tr>
+                            <td class="text-center">
+                                <img src="{{ agent.photo.url }}" alt="{{ agent.name }}" 
+                                     class="rounded-circle" style="width: 50px; height: 50px;">
+                            </td>
+                            <td>{{ agent.name }}</td>
+                            <td>{{ agent.surname }}</td>
+                            <td>{{ agent.get_status_display }}</td>
+                            <td class="text-center">
+                                <a href="{% url 'edit_agent' agent.id %}" 
+                                   class="btn btn-primary btn-sm">Düzenle</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Bu yöneticide personel bulunmamaktadır.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a href="{% url 'manager_list' %}" class="btn btn-secondary mt-3">
+                Yöneticilere Geri Dön
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock content %}
