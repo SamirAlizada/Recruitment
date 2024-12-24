@@ -6,10 +6,16 @@ class Group(models.Model):
     def __str__(self):
         return self.name
 
+class Department(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
 class Manager(models.Model):
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50)
-    department = models.CharField(max_length=100, null=True)
+    department = models.ForeignKey(Department, on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
