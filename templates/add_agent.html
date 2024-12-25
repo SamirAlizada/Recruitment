@@ -49,7 +49,15 @@
                             <!-- FIN Numarası -->
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="id_fin" name="fin" required>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="id_fin" 
+                                           name="fin" 
+                                           required 
+                                           maxlength="7" 
+                                           pattern=".{7,7}" 
+                                           title="FIN kodu tam olarak 7 karakter olmalıdır"
+                                           oninput="this.value = this.value.slice(0, 7)">
                                     <label for="id_fin">FIN <span class="text-danger">*</span></label>
                                 </div>
                             </div>
