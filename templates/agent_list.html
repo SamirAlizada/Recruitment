@@ -67,12 +67,34 @@
                                             </a>
                                             <button type="button" 
                                                     class="btn btn-sm btn-outline-danger"
-                                                    onclick="confirmDelete('{{ agent.id }}')">
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#deleteModal{{ agent.id }}">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </div>
                                     </td>
                                 </tr>
+
+                                <!-- Delete Modal for each agent -->
+                                <div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1" style="padding-top: 100px;">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Personeli Sil</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p class="mb-0">{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                                                <a href="{% url 'agent_delete' agent.id %}" class="btn btn-danger">
+                                                    <i class="fas fa-trash me-2"></i>Sil
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 {% empty %}
                                 <tr>
                                     <td colspan="7" class="text-center py-4">
