@@ -1,0 +1,225 @@
+{% extends 'base.html' %}
+{% block title %}{{ agent.name }} {{ agent.surname }} - Personel Düzenle{% endblock %}
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow">
+                <div class="card-header bg-gradient-primary text-white py-3">
+                    <h2 class="h4 mb-0">
+                        <i class="fas fa-user-edit me-2"></i>
+                        Personel Düzenle: {{ agent.name }} {{ agent.surname }}
+                    </h2>
+                </div>
+                <div class="card-body p-4">
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row g-4">
+                            <!-- Fotoğraf Yükleme Alanı -->
+                            <div class="col-12 text-center mb-4">
+                                <div class="position-relative d-inline-block">
+                                    <div id="photoPreview" class="rounded-circle bg-light d-flex align-items-center justify-content-center mb-3" 
+                                            style="width: 150px; height: 150px; border: 2px dashed #ccc;">
+                                        {% if agent.photo %}
+                                            <img src="{{ agent.photo.url }}" class="rounded-circle" 
+                                                    style="width: 100%; height: 100%; object-fit: cover;">
+                                        {% else %}
+                                            <i class="fas fa-user fa-4x text-muted"></i>
+                                        {% endif %}
+                                    </div>
+                                    <label for="id_photo" class="btn btn-sm btn-primary position-absolute bottom-0 end-0">
+                                        <i class="fas fa-camera"></i>
+                                    </label>
+                                    <input type="file" id="id_photo" name="photo" class="d-none" accept="image/*">
+                                </div>
+                            </div>
+                                <!-- İsim ve Soyisim -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="id_name" name="name" 
+                                            value="{{ agent.name }}" required>
+                                    <label for="id_name">İsim <span class="text-danger">*</span></label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="id_surname" name="surname" 
+                                            value="{{ agent.surname }}" required>
+                                    <label for="id_surname">Soyisim <span class="text-danger">*</span></label>
+                                </div>
+                            </div>
+
+                            <!-- FIN ve Status yan yana -->
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <input type="text" class="form-control" id="id_fin" name="fin" 
+                                            value="{{ agent.fin }}" required>
+                                    <label for="id_fin">FIN <span class="text-danger">*</span></label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-floating">
+                                    <select class="form-select" id="id_status" name="status" required>
+                                        {% for status_value, status_label in status_choices %}
+                                        <option value="{{ status_value }}" 
+                                                {% if agent.status == status_value %}selected{% endif %}>
+                                            {{ status_label }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="id_status">Durum <span class="text-danger">*</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Department ve Manager yan yana -->
+                            <div class="col-md-6" id="department-selection" style="display: none;">
+                                <div class="form-floating">
+                                    <select class="form-select" id="id_department" name="department">
+                                        <option value="">Departman Seçiniz</option>
+                                        {% for dept in departments %}
+                                        <option value="{{ dept.id }}" 
+                                                {% if agent.manager and agent.manager.department.id == dept.id %}selected{% endif %}>
+                                            {{ dept.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="id_department">Departman <span class="text-danger">*</span></label>
+                                </div>
+                            </div>
+                            <div class="col-md-6" id="manager-selection" style="display: none;">
+                                <div class="form-floating">
+                                    <select class="form-select" id="id_manager" name="manager">
+                                        <option value="">Önce Departman Seçiniz</option>
+                                    </select>
+                                    <label for="id_manager">Yönetici <span class="text-danger">*</span></label>
+                                </div>
+                            </div>
+
+                            <!-- Grup en alta -->
+                            <div class="col-12">
+                                <div class="form-floating">
+                                    <select class="form-select" id="id_group" name="group" required>
+                                        {% for group in groups %}
+                                        <option value="{{ group.id }}" 
+                                                {% if agent.group.id == group.id %}selected{% endif %}>
+                                            {{ group.name }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="id_group">Grup <span class="text-danger">*</span></label>
+                                </div>
+                            </div>
+                        </div>
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                            <a href="{% url 'agent_list' %}" class="btn btn-light btn-lg px-4">
+                                <i class="fas fa-times me-2"></i>İptal
+                            </a>
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<style>
+.bg-gradient-primary {
+    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+    }
+
+    .form-floating > label {
+    font-size: 0.9rem;
+    }
+
+    .form-control:focus, .form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+    }
+
+    .btn-light {
+    background-color: #f8f9fc;
+    border-color: #e3e6f0;
+    }
+
+    .btn-light:hover {
+    background-color: #e3e6f0;
+    border-color: #d1d3e2;
+    }
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const statusSelect = document.getElementById('id_status');
+    const departmentSelection = document.getElementById('department-selection');
+    const managerSelection = document.getElementById('manager-selection');
+    const departmentSelect = document.getElementById('id_department');
+    const managerSelect = document.getElementById('id_manager');
+
+    // Status değiştiğinde
+    statusSelect.addEventListener('change', function() {
+        const requiresManager = ['Passed to Training', 'Invited to Work', 'Failed to Work'].includes(this.value);
+        
+        departmentSelection.style.display = requiresManager ? 'block' : 'none';
+        managerSelection.style.display = 'none';
+        
+        if (!requiresManager) {
+            departmentSelect.value = '';
+            managerSelect.value = '';
+        }
+    });
+
+    // Department değiştiğinde
+    departmentSelect.addEventListener('change', function() {
+        if (this.value) {
+            loadManagers(this.value);
+        } else {
+            managerSelection.style.display = 'none';
+            managerSelect.innerHTML = '<option value="">Önce Departman Seçiniz</option>';
+        }
+    });
+
+    // Managerleri yükle
+    function loadManagers(departmentId) {
+        const url = `/api/departments/${departmentId}/managers/`;
+        console.log('API çağrısı yapılıyor:', url);
+
+        fetch(url)
+            .then(response => {
+                console.log('API yanıtı:', response.status);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Alınan veri:', data);
+                managerSelect.innerHTML = '<option value="">Yönetici Seçiniz</option>';
+                
+                if (Array.isArray(data) && data.length > 0) {
+                    data.forEach(manager => {
+                        const option = document.createElement('option');
+                        option.value = manager.id;
+                        option.textContent = `${manager.name} ${manager.surname}`;
+                        managerSelect.appendChild(option);
+                    });
+                } else {
+                    managerSelect.innerHTML = '<option value="">Bu departmanda yönetici bulunmuyor</option>';
+                }
+                managerSelection.style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Hata:', error);
+                managerSelect.innerHTML = '<option value="">Yöneticiler yüklenirken hata oluştu</option>';
+                managerSelection.style.display = 'block';
+            });
+    }
+
+    // Sayfa yüklendiğinde mevcut duruma göre kontrol et
+    if (['Passed to Training', 'Invited to Work', 'Failed to Work'].includes(statusSelect.value)) {
+        departmentSelection.style.display = 'block';
+        if (departmentSelect.value) {
+            loadManagers(departmentSelect.value);
+        }
+    }
+});
+</script>
+{% endblock %}
