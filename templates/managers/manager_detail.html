@@ -1,50 +1,274 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ manager.name }} - Yönetici Detayı{% endblock %}
 
 {% block content %}
-<div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="mb-4">Yönetici: {{ manager.name }}</h1>
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Fotoğraf</th>
-                            <th>Ad</th>
-                            <th>Soyad</th>
-                            <th>Durum</th>
-                            <th>İşlemler</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for agent in agents %}
-                        <tr>
-                            <td class="text-center">
-                                <img src="{{ agent.photo.url }}" alt="{{ agent.name }}" 
-                                     class="rounded-circle" style="width: 50px; height: 50px;">
-                            </td>
-                            <td>{{ agent.name }}</td>
-                            <td>{{ agent.surname }}</td>
-                            <td>{{ agent.get_status_display }}</td>
-                            <td class="text-center">
-                                <a href="{% url 'edit_agent' agent.id %}" 
-                                   class="btn btn-primary btn-sm">Düzenle</a>
-                            </td>
-                        </tr>
-                        {% empty %}
-                        <tr>
-                            <td colspan="5" class="text-center">Bu yöneticide personel bulunmamaktadır.</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xl-10">
+            <div class="d-flex flex-column mb-4">
+                <h1 class="h4 mb-2">{{ manager.department.name }}</h1>
+                <h2 class="h5 mb-0">Yönetici: {{ manager.name }} {{ manager.surname }}</h2>
             </div>
-            <a href="{% url 'manager_list' %}" class="btn btn-secondary mt-3">
-                Yöneticilere Geri Dön
-            </a>
+            <div class="card shadow-sm">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th class="border-0 py-3 text-white" style="width: 80px; background-color: #17386b;">
+                                    <span class="small text-uppercase">Fotoğraf</span>
+                                </th>
+                                <th class="border-0 py-3 text-white" style="width: 150px; background-color: #17386b;">
+                                    <span class="small text-uppercase">Ad</span>
+                                </th>
+                                <th class="border-0 py-3 text-white" style="width: 150px; background-color: #17386b;">
+                                    <span class="small text-uppercase">Soyad</span>
+                                </th>
+                                <th class="border-0 py-3 text-white" style="width: 200px; background-color: #17386b;">
+                                    <span class="small text-uppercase">İcbari</span>
+                                </th>
+                                <th class="border-0 py-3 text-white" style="width: 200px; background-color: #17386b;">
+                                    <span class="small text-uppercase">Könüllü</span>
+                                </th>
+                                <th class="border-0 py-3 text-white text-center" style="width: 120px; background-color: #17386b;">
+                                    <span class="small text-uppercase">İşlemler</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in agents %}
+                            <tr data-agent-id="{{ agent.id }}">
+                                <td>
+                                    {% if agent.photo %}
+                                        <img src="{{ agent.photo.url }}" 
+                                             alt="{{ agent.name }}" 
+                                             class="rounded-circle border shadow-sm agent-photo" 
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle border bg-secondary d-flex align-items-center justify-content-center agent-photo" 
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                </td>
+                                <td class="fw-medium">{{ agent.name }}</td>
+                                <td>{{ agent.surname }}</td>
+                                <td>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Say:</span>
+                                        <input type="number" 
+                                               class="form-control form-control-sm bg-light" 
+                                               style="width: 90px;"
+                                               value="{{ agent.icbari_1|default_if_none:'' }}"
+                                               data-field="icbari_1"
+                                               onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Ümumi:</span>
+                                        <input type="number" 
+                                            class="form-control form-control-sm bg-light"
+                                            style="width: 90px;" 
+                                            value="{{ agent.icbari_2|default_if_none:'' }}"
+                                            data-field="icbari_2"
+                                            step="0.01">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Say:</span>
+                                        <input type="number" 
+                                            class="form-control form-control-sm bg-light"
+                                            style="width: 90px;" 
+                                            value="{{ agent.konullu_1|default_if_none:'' }}"
+                                            data-field="konullu_1"
+                                            onkeypress="return event.charCode >= 48 && event.charCode <= 57">
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Ümumi:</span>
+                                        <input type="number" 
+                                               class="form-control form-control-sm bg-light"
+                                               style="width: 90px;" 
+                                               value="{{ agent.konullu_2|default_if_none:'' }}"
+                                               data-field="konullu_2"
+                                               step="0.01">
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{% url 'edit_agent' agent.id %}" 
+                                       class="btn btn-primary btn-sm px-3 mb-1 w-100">
+                                       <i class="fas fa-edit me-1"></i>Düzenle
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-danger btn-sm px-3 w-100"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal{{ agent.id }}">
+                                        <i class="fas fa-trash me-1"></i>Sil
+                                    </button>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="6" class="text-center py-4 text-muted">
+                                    Bu yöneticide personel bulunmamaktadır.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="mt-4">
+                <a href="{% url 'department_detail' manager.department.id %}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>
+                    {{ manager.department.name }} Departmanına Geri Dön
+                </a>
+            </div>
         </div>
     </div>
 </div>
-{% endblock content %}
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = document.querySelectorAll('input[type="number"]');
+    
+    inputs.forEach(input => {
+        input.addEventListener('change', function() {
+            const agentId = this.closest('tr').dataset.agentId;
+            const fieldName = this.dataset.field;
+            const value = this.value;
+
+            fetch('{% url "update_agent_values" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    agent_id: agentId,
+                    field: fieldName,
+                    value: value
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Değeri güncelle
+                    input.value = data.value !== null ? data.value : '';
+                    
+                    // Başarı göstergesi
+                    input.classList.add('is-valid');
+                    setTimeout(() => input.classList.remove('is-valid'), 1000);
+                } else {
+                    input.classList.add('is-invalid');
+                    setTimeout(() => input.classList.remove('is-invalid'), 1000);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                input.classList.add('is-invalid');
+                setTimeout(() => input.classList.remove('is-invalid'), 1000);
+            });
+        });
+    });
+
+    // CSRF token alma fonksiyonu
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Silme fonksiyonu
+    window.deleteAgent = function(agentId) {
+        // Mevcut URL'den source parametresini al
+        const currentPath = window.location.pathname;
+        let source = 'agent_list';
+        
+        if (currentPath.includes('/managers/')) {
+            source = 'manager_detail';
+        } else if (currentPath.includes('/groups/')) {
+            source = 'group_detail';
+        }
+
+        fetch(`/agents/${agentId}/delete/?source=${source}`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken'),
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Silme başarılı olduğunda satırı kaldır
+                const row = document.querySelector(`tr[data-agent-id="${agentId}"]`);
+                if (row) {
+                    row.remove();
+                }
+                
+                // Modalı kapat
+                const modal = document.getElementById(`deleteModal${agentId}`);
+                const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                bootstrapModal.hide();
+
+            } else {
+                alert('Silme işlemi sırasında bir hata oluştu.');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Silme işlemi sırasında bir hata oluştu.');
+        });
+    }
+});
+</script>
+
+<!-- Her agent için modal -->
+{% for agent in agents %}
+<div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog" style="margin-top: 10vh;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Personel Silme Onayı</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p class="mb-0">{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" 
+                        class="btn btn-danger delete-agent" 
+                        data-agent-id="{{ agent.id }}"
+                        onclick="deleteAgent({{ agent.id }})">
+                    Sil
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<style>
+    .agent-photo {
+        transition: transform 0.2s ease;
+        cursor: pointer;
+    }
+    .agent-photo:hover {
+        transform: scale(1.5);
+        z-index: 1000;
+    }
+</style>
+
+{% endblock %}
