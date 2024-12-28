@@ -1,10 +1,15 @@
 from django.db import models
 
 class Group(models.Model):
-    name = models.CharField(max_length=50)  # Qrup adı (Səhər və ya Axşam)
+    name = models.CharField(max_length=100)  # Qrup adı (Səhər və ya Axşam)
+    members = models.ManyToManyField('Agent', related_name='groups', blank=True)
 
     def __str__(self):
         return self.name
+
+    @property
+    def member_count(self):
+        return self.members.count()
 
 class Department(models.Model):
     name = models.CharField(max_length=100)
@@ -13,6 +18,7 @@ class Department(models.Model):
         return self.name
 
 class Manager(models.Model):
+    photo = models.ImageField(upload_to='manager_photos/', blank=True, null=True)
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
@@ -29,7 +35,12 @@ class Agent(models.Model):
     name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
     fin = models.CharField(max_length=7)
+    phone = models.CharField(max_length=15, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    icbari_1 = models.IntegerField(null=True, blank=True)
+    icbari_2 = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    konullu_1 = models.IntegerField(null=True, blank=True)
+    konullu_2 = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     status = models.CharField(
         max_length=20,
         choices=[
@@ -48,3 +59,14 @@ class Agent(models.Model):
 
     def __str__(self):
         return f"{self.name} {self.surname} - {self.status}"
+
+class AgentSchedule(models.Model):
+    agent = models.ForeignKey(Agent, on_delete=models.CASCADE)
+    date = models.DateField()
+    schedule_type = models.CharField(max_length=2, choices=[
+        ('i', 'i/e'),
+        ('qb', 'qb'),
+    ])
+
+    class Meta:
+        unique_together = ['agent', 'date']  # Bir agent'ın bir günde sadece bir schedule'ı olabilir
