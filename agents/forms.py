@@ -5,15 +5,15 @@ from .models import Agent, Manager, Department
 class AgentForm(forms.ModelForm):
     class Meta:
         model = Agent
-        fields = ['photo', 'name', 'surname', 'fin', 'status', 'group']
+        fields = ['photo', 'name', 'surname', 'fin', 'phone', 'status', 'group']
 
 class ManagerForm(forms.ModelForm):
     class Meta:
         model = Manager
-        fields = ['name', 'surname']
+        fields = ['photo', 'name', 'surname']
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'surname': forms.TextInput(attrs={'class': 'form-control'})
+            'surname': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, department=None, **kwargs):
