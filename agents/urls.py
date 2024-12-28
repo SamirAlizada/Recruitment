@@ -7,8 +7,9 @@ urlpatterns = [
     path('add/', views.add_agent, name='add_agent'),
     path('update/<int:pk>/', views.update_agent_status, name='update_agent_status'),
     path('edit/<int:pk>/', views.edit_agent, name='edit_agent'),
-    path('agent/<int:agent_id>/delete/', views.delete_agent, name='agent_delete'),
-
+    path('agent/<int:pk>/delete/', views.agent_delete, name='agent_delete'),
+    path('agents/<int:agent_id>/delete/', views.delete_agent, name='delete_agent'),
+    
     path('groups/', views.group_list, name='group_list'),
     path('groups/<int:group_id>/', views.group_detail, name='group_detail'),
 
@@ -29,4 +30,5 @@ urlpatterns = [
     path('departments/<int:dept_pk>/managers/<int:manager_pk>/', views.manager_detail, name='manager_detail'),
     path('api/departments/<int:dept_id>/managers/', views.get_department_managers, name='get_department_managers'),
     path('departments/<int:dept_pk>/add-manager/', views.add_manager, name='department_add_manager'),
+    path('update-agent-values/', views.update_agent_values, name='update_agent_values'),
 ]
