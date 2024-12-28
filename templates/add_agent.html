@@ -66,10 +66,7 @@
                             <div class="col-md-6">
                                 <div class="form-floating">
                                     <select class="form-select" id="id_status" name="status" required>
-                                        <option value="">Seçiniz</option>
-                                        {% for status_value, status_label in status_choices %}
-                                        <option value="{{ status_value }}">{{ status_label }}</option>
-                                        {% endfor %}
+                                        <option value="Passed to Interview" selected>Passed to Interview</option>
                                     </select>
                                     <label for="id_status">Durum <span class="text-danger">*</span></label>
                                 </div>
