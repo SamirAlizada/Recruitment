@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h1 class="display-4">Departmanlar</h1>
+        <a href="{% url 'add_department' %}" class="btn btn-primary btn-lg mt-2">
+            <i class="fas fa-plus"></i> Yeni Departman
+        </a>
+    </div>
+
+    <!-- {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %} -->
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 justify-content-center">
+        {% for department in departments %}
+        <div class="col">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <h3 class="card-title mb-3">{{ department.name }}</h3>
+                    <p class="card-text text-muted">
+                        <i class="fas fa-users"></i> {{ department.manager_set.count }} Yönetici
+                    </p>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'department_detail' department.pk %}" class="btn btn-primary">
+                            <i class="fas fa-info-circle"></i> Detaylar
+                        </a>
+                        <div class="btn-group mt-2" role="group">
+                            <a href="{% url 'edit_department' department.pk %}" class="btn btn-warning">
+                                <i class="fas fa-edit"></i> Düzenle
+                            </a>
+                            <a href="#" class="btn btn-danger" 
+                                onclick="setupDepartmentDelete('{% url 'delete_department' department.pk %}')"
+                                data-bs-toggle="modal" 
+                                data-bs-target="#deleteDepartmentModal">
+                                <i class="fas fa-trash"></i> Sil
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12 text-center">
+            <div class="alert alert-info">
+                Henüz departman bulunmamaktadır.
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteDepartmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Departman Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu departmanı silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger"><small>Bu işlem geri alınamaz!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteDepartmentForm" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script>
+function setupDepartmentDelete(url) {
+    document.getElementById('deleteDepartmentForm').action = url;
+}
+</script>
+
+<style>
+.hover-card {
+    transition: transform 0.2s ease-in-out;
+}
+.hover-card:hover {
+    transform: translateY(-5px);
+}
+</style>
+{% endblock %}
