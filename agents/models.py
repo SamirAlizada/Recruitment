@@ -54,7 +54,7 @@ class Agent(models.Model):
         ],
         default="Passed to Interview"
     )
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=False, null=False, default=get_default_group)
+    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True)
     manager = models.ForeignKey(Manager, on_delete=models.SET_NULL, blank=True, null=True)
 
     def __str__(self):
