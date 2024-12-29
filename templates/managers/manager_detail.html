@@ -38,7 +38,7 @@
                         </thead>
                         <tbody>
                             {% for agent in agents %}
-                            <tr data-agent-id="{{ agent.id }}">
+                            <tr data-agent-id="{{ agent.id }}" class="{% if agent.status == 'Failed to Work' %}table-danger{% endif %}">
                                 <td>
                                     {% if agent.photo %}
                                         <img src="{{ agent.photo.url }}" 
@@ -61,6 +61,7 @@
                                                class="form-control form-control-sm bg-light" 
                                                style="width: 90px;"
                                                value="{{ agent.icbari_1|default_if_none:'' }}"
+                                               {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
                                                data-field="icbari_1"
                                                onkeypress="return event.charCode >= 48 && event.charCode <= 57">
                                     </div>
@@ -70,6 +71,7 @@
                                             class="form-control form-control-sm bg-light"
                                             style="width: 90px;" 
                                             value="{{ agent.icbari_2|default_if_none:'' }}"
+                                            {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
                                             data-field="icbari_2"
                                             step="0.01">
                                     </div>
@@ -81,6 +83,7 @@
                                             class="form-control form-control-sm bg-light"
                                             style="width: 90px;" 
                                             value="{{ agent.konullu_1|default_if_none:'' }}"
+                                            {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
                                             data-field="konullu_1"
                                             onkeypress="return event.charCode >= 48 && event.charCode <= 57">
                                     </div>
@@ -90,6 +93,7 @@
                                                class="form-control form-control-sm bg-light"
                                                style="width: 90px;" 
                                                value="{{ agent.konullu_2|default_if_none:'' }}"
+                                               {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
                                                data-field="konullu_2"
                                                step="0.01">
                                     </div>
@@ -268,6 +272,24 @@ document.addEventListener('DOMContentLoaded', function() {
     .agent-photo:hover {
         transform: scale(1.5);
         z-index: 1000;
+    }
+
+    .table-danger {
+        background-color: #ffebee !important;
+    }
+
+    .table-danger:hover {
+        background-color: #ffcdd2 !important;
+    }
+
+    .table-danger td {
+        background-color: #ffebee !important;
+    }
+
+    .table-danger input:disabled {
+        background-color: #ffebee !important;
+        opacity: 0.7;
+        cursor: not-allowed;
     }
 </style>
 
