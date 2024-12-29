@@ -1,56 +1,123 @@
 {% extends 'base.html' %}
+{% load agent_filters %}
 
 {% block title %}{{ group.name }} - Grup Detayı{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
-    <div class="row">
-        <div class="col-12">
-            <h1 class="text-primary border-bottom border-primary pb-2 mb-4">
-                Grup: {{ group.name }}
-            </h1>
-
-            <div class="text-center mb-4 fs-5 text-secondary">
-                {{ week_start|date:"d" }} - {{ week_end|date:"d F" }}
+    <!-- Başlık ve Tarih Alanı -->
+    <div class="row mb-4">
+        <div class="col-12 text-center">
+            <h2 class="display-4 mb-3">
+                <i class="fas fa-users me-2"></i>{{ group.name }}
+            </h2>
+            <div class="text-muted fs-5 mb-4">
+                {{ week_start|date:"d" }} - {{ week_end|date:"d F"|az_month }}
             </div>
+        </div>
+    </div>
 
-            <h2 class="h4 mb-4">Bu Gruptaki Personeller:</h2>
-
-            <div class="card shadow-sm">
+    <div class="row justify-content-center">
+        <div class="col-12 col-xxl-10">
+            <!-- Agent Tablosu -->
+            <div class="card shadow-sm hover-shadow">
+                <div class="card-header bg-light py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Grup Agentleri</h4>
+                        <a href="{% url 'group_list' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Gruplara Geri Dön
+                        </a>
+                    </div>
+                </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover mb-0">
-                            <thead class="table-primary">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
                                 <tr>
-                                    <th class="text-start" style="min-width: 250px;">Personel</th>
+                                    <th class="text-start py-3" style="min-width: 300px;">Agent</th>
                                     {% for day in days %}
-                                    <th class="text-center">{{ day }}</th>
+                                    <th class="text-center py-3 {% if day.date < current_date %}bg-secondary bg-opacity-10{% endif %}">
+                                        {{ day|az_month }}
+                                    </th>
                                     {% endfor %}
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for agent in agents %}
-                                <tr>
-                                    <td class="align-middle">
-                                        <div class="d-flex align-items-center gap-3">
+                                <tr class="{% if agent.status == 'Failed to Training' %}table-danger{% endif %}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-3 p-2">
                                             <div class="position-relative">
+                                                {% if agent.photo %}
                                                 <img src="{{ agent.photo.url }}" 
                                                      alt="{{ agent.name }}" 
-                                                     class="rounded-circle"
-                                                     style="width: 40px; height: 40px; transition: transform 0.3s ease;"
-                                                     onmouseover="this.style.transform='scale(3)'; this.style.zIndex='1000';" 
+                                                     class="rounded-circle shadow-sm"
+                                                     style="width: 45px; height: 45px; object-fit: cover; transition: all 0.3s ease;"
+                                                     onmouseover="this.style.transform='scale(1.9)'; this.style.zIndex='1000';" 
                                                      onmouseout="this.style.transform='scale(1)'; this.style.zIndex='1';">
+                                                {% else %}
+                                                <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center"
+                                                     style="width: 45px; height: 45px;">
+                                                    <i class="fas fa-user text-secondary"></i>
+                                                </div>
+                                                {% endif %}
                                             </div>
-                                            <span>{{ agent.name }} {{ agent.surname }}</span>
+                                            <div class="d-flex align-items-center justify-content-between flex-grow-1">
+                                                <div>
+                                                    <h6 class="mb-0">{{ agent.name }} {{ agent.surname }}</h6>
+                                                    {% if agent.department %}
+                                                    <small class="text-muted">{{ agent.department.name }}</small>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{% url 'edit_agent' agent.id %}" class="btn btn-sm btn-outline-primary">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-outline-danger" 
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#deleteModal{{ agent.id }}">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title">Personeli Sil</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                                                        <a href="{% url 'agent_delete' agent.id %}" class="btn btn-danger">
+                                                            <i class="fas fa-trash me-2"></i>Sil
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </td>
                                     {% for date in week_dates %}
-                                    <td>
-                                        <select class="form-select form-select-sm" 
-                                                {% if date < current_date %}disabled{% endif %}>
+                                    <td class="text-center {% if date < current_date and agent.status != 'Failed to Training' %}past-date-column{% endif %}">
+                                        <select class="form-select form-select-sm border-0 schedule-select 
+                                                {% if agent.status == 'Failed to Training' %}
+                                                    bg-danger bg-opacity-10
+                                                {% elif date < current_date %}
+                                                    past-date
+                                                {% endif %}" 
+                                                {% if date < current_date or agent.status == 'Failed to Training' %}disabled{% endif %}
+                                                data-agent-id="{{ agent.id }}"
+                                                data-date="{{ date|date:'Y-m-d' }}"
+                                                style="width: auto; min-width: 80px; margin: 0 auto;">
                                             <option value="">Seçiniz</option>
-                                            <option value="i">i/e</option>
-                                            <option value="qb">qb</option>
+                                            <option value="i" {% if agent|get_schedule:date == 'i' %}selected{% endif %}>i/e</option>
+                                            <option value="qb" {% if agent|get_schedule:date == 'qb' %}selected{% endif %}>qb</option>
                                         </select>
                                     </td>
                                     {% endfor %}
@@ -61,11 +128,150 @@
                     </div>
                 </div>
             </div>
-
-            <a href="{% url 'group_list' %}" class="btn btn-primary mt-4">
-                Gruplara Geri Dön
-            </a>
         </div>
     </div>
 </div>
+
+<style>
+.hover-shadow {
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.card {
+    border: none;
+    border-radius: 1rem;
+}
+
+.card-header {
+    border-top-left-radius: 1rem !important;
+    border-top-right-radius: 1rem !important;
+}
+
+.table > :not(caption) > * > * {
+    padding: 1rem 0.75rem;
+}
+
+.form-select {
+    transition: all 0.3s ease;
+}
+
+.form-select:hover:not(:disabled) {
+    background-color: #f8f9fa;
+}
+
+.form-select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+}
+
+.display-4 {
+    font-weight: 600;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+@media (max-width: 768px) {
+    .table-responsive {
+        border-radius: 0;
+    }
+}
+
+.table-danger {
+    background-color: #ffebee !important;
+}
+
+.table-danger:hover {
+    background-color: #ffcdd2 !important;
+}
+
+.table-danger td {
+    background-color: #ffebee !important;
+}
+
+.table-danger .form-select {
+    background-color: #ffebee !important;
+}
+
+.table-danger .form-select:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.past-date {
+    background-color: #e9ecef !important;
+    color: #495057 !important;
+    opacity: 0.9;
+}
+
+.past-date:disabled {
+    background-color: #e9ecef !important;
+    cursor: not-allowed;
+}
+
+.past-date-column {
+    background-color: #e9ecef !important;
+}
+
+/* Failed to Training durumunda geçmiş tarih stilini ezme */
+.table-danger td.past-date-column {
+    background-color: #ffebee !important;
+}
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.schedule-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const agentId = this.dataset.agentId;
+            const date = this.dataset.date;
+            const scheduleType = this.value;
+            
+            fetch('', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: `agent_id=${agentId}&date=${date}&schedule_type=${scheduleType}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Başarılı
+                } else {
+                    alert('Bir hata oluştu!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Bir hata oluştu!');
+            });
+        });
+    });
+});
+
+// CSRF token için yardımcı fonksiyon
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
 {% endblock %}
