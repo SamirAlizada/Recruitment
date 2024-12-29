@@ -102,7 +102,7 @@
                             </div>
 
                             <!-- Departman ve Yönetici -->
-                            <div class="row g-4 mt-3">
+                            <div class="row g-4 mt-3" id="department-manager-section" style="display: none;">
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <select class="form-select" id="id_department" name="department">
@@ -193,34 +193,32 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const statusSelect = document.getElementById('id_status');
-    const departmentSelection = document.getElementById('department-selection');
-    const managerSelection = document.getElementById('manager-selection');
+    const departmentManagerSection = document.getElementById('department-manager-section');
     const departmentSelect = document.getElementById('id_department');
     const managerSelect = document.getElementById('id_manager');
     const currentManagerId = managerSelect.dataset.currentManager;
 
     // Status değiştiğinde
     statusSelect.addEventListener('change', function() {
-        const requiresManager = ['Passed to Training', 'Invited to Work', 'Failed to Work'].includes(this.value);
+        const showManagerSection = ['Passed to Training', 'Invited to Work', 'Failed to Work', 'Passed to Work'].includes(this.value);
         
-        if (!requiresManager) {
+        departmentManagerSection.style.display = showManagerSection ? 'flex' : 'none';
+        
+        if (!showManagerSection) {
             departmentSelect.value = '';
             managerSelect.innerHTML = '<option value="">Yönetici Seçiniz</option>';
-            departmentSelection.style.display = 'none';
-            managerSelection.style.display = 'none';
-        } else {
-            departmentSelection.style.display = 'block';
-            managerSelection.style.display = 'block';
-            
-            // Eğer mevcut bir manager varsa, onu koru
-            if (currentManagerId) {
-                const currentManagerOption = managerSelect.querySelector(`option[value="${currentManagerId}"]`);
-                if (!currentManagerOption) {
-                    loadManagers(departmentSelect.value, currentManagerId);
-                }
+        } else if (currentManagerId) {
+            const currentManagerOption = managerSelect.querySelector(`option[value="${currentManagerId}"]`);
+            if (!currentManagerOption) {
+                loadManagers(departmentSelect.value, currentManagerId);
             }
         }
     });
+
+    // Sayfa yüklendiğinde mevcut durumu kontrol et
+    const currentStatus = statusSelect.value;
+    const showManagerSection = ['Passed to Training', 'Invited to Work', 'Failed to Work', 'Passed to Work'].includes(currentStatus);
+    departmentManagerSection.style.display = showManagerSection ? 'flex' : 'none';
 
     // Department değiştiğinde
     departmentSelect.addEventListener('change', function() {
@@ -250,21 +248,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                         managerSelect.appendChild(option);
                     });
-                } else {
-                    managerSelect.innerHTML = '<option value="">Bu departmanda yönetici bulunmuyor</option>';
                 }
-            })
-            .catch(error => {
-                console.error('Hata:', error);
-                managerSelect.innerHTML = '<option value="">Yöneticiler yüklenirken hata oluştu</option>';
             });
-    }
-
-    // Sayfa yüklendiğinde mevcut duruma göre kontrol et
-    const currentStatus = statusSelect.value;
-    if (['Passed to Training', 'Invited to Work', 'Failed to Work'].includes(currentStatus)) {
-        departmentSelection.style.display = 'block';
-        managerSelection.style.display = 'block';
     }
 
     // Fotoğraf önizleme için
