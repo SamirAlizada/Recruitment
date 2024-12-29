@@ -46,42 +46,58 @@
                                 </div>
                             </div>
 
-                            <!-- FIN Numarası -->
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" 
-                                           class="form-control" 
-                                           id="id_fin" 
-                                           name="fin" 
-                                           required 
-                                           maxlength="7" 
-                                           pattern=".{7,7}" 
-                                           title="FIN kodu tam olarak 7 karakter olmalıdır"
-                                           oninput="this.value = this.value.slice(0, 7)">
-                                    <label for="id_fin">FIN <span class="text-danger">*</span></label>
+                            <!-- Telefon ve FIN aynı satırda -->
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="tel" 
+                                               class="form-control" 
+                                               id="id_phone" 
+                                               name="phone" 
+                                               required 
+                                               placeholder="(0XX) XXX XX XX"
+                                               maxlength="15">
+                                        <label for="id_phone">Telefon <span class="text-danger">*</span></label>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="id_fin" 
+                                               name="fin" 
+                                               required 
+                                               maxlength="7" 
+                                               pattern=".{7,7}" 
+                                               title="FIN kodu tam olarak 7 karakter olmalıdır"
+                                               oninput="this.value = this.value.slice(0, 7)">
+                                        <label for="id_fin">FIN <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- Durum -->
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <select class="form-select" id="id_status" name="status" required>
-                                        <option value="Passed to Interview" selected>Passed to Interview</option>
-                                    </select>
-                                    <label for="id_status">Durum <span class="text-danger">*</span></label>
+                            <!-- Durum ve Grup aynı satırda -->
+                            <div class="row g-4 mt-2">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="id_status" name="status" required>
+                                            <option value="Passed to Interview" selected>Passed to Interview</option>
+                                        </select>
+                                        <label for="id_status">Durum <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <!-- Grup -->
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <select class="form-select" id="id_group" name="group" required>
-                                        <option value="">Seçiniz</option>
-                                        {% for group in groups %}
-                                        <option value="{{ group.id }}">{{ group.name }}</option>
-                                        {% endfor %}
-                                    </select>
-                                    <label for="id_group">Grup <span class="text-danger">*</span></label>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <select class="form-select" id="id_group" name="group" required>
+                                            <option value="">Seçiniz</option>
+                                            {% for group in groups %}
+                                            <option value="{{ group.id }}">{{ group.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                        <label for="id_group">Grup <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -124,8 +140,19 @@
     background-color: #e3e6f0;
     border-color: #d1d3e2;
 }
+
+/* Input mask placeholder stilini düzelt */
+.form-floating input:not(.filled)::placeholder {
+    color: transparent;
+}
+
+.form-floating input:focus + label + small,
+.form-floating input:not(:placeholder-shown) + label + small {
+    display: none;
+}
 </style>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Fotoğraf önizleme
@@ -151,6 +178,30 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         form.classList.add('was-validated');
     });
+
+    function maskPhoneNumber(input) {
+        input.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');  // Sadece rakamları al
+
+            // 0 ile başlamasını sağla
+            if (!value.startsWith('0')) {
+                value = '0' + value;
+            }
+
+            // Formatı uygula
+            let x = value.match(/(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
+            e.target.value = (x[1] ? `(${x[1]})` : '') +
+                (x[2] ? ` ${x[2]}` : '') +
+                (x[3] ? ` ${x[3]}` : '') +
+                (x[4] ? ` ${x[4]}` : '');
+        });
+    }
+
+    let phoneInput = document.getElementById('id_phone');
+    if (phoneInput) {
+        phoneInput.placeholder = "(0XX) XXX XX XX";
+        maskPhoneNumber(phoneInput);
+    }
 });
 </script>
 {% endblock %}
