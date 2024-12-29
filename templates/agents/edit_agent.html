@@ -204,6 +204,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         departmentManagerSection.style.display = showManagerSection ? 'flex' : 'none';
         
+        // Grup seçimini kontrol et
+        const groupSelect = document.getElementById('id_group');
+        if (['Invited to Work', 'Failed to Work', 'Passed to Work'].includes(this.value)) {
+            groupSelect.value = '';
+            groupSelect.disabled = true;
+        } else {
+            groupSelect.disabled = false;
+        }
+        
         if (!showManagerSection) {
             departmentSelect.value = '';
             managerSelect.innerHTML = '<option value="">Yönetici Seçiniz</option>';
