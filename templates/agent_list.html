@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load agent_filters %}
 
 {% block title %}Personel Listesi{% endblock %}
 
@@ -13,7 +14,16 @@
                 </a>
             </div>
 
-            <div class="card shadow-sm">
+            {% regroup agents by created_at|date:"F Y" as agents_by_month %}
+            
+            {% for month in agents_by_month %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-light">
+                    <h3 class="h5 mb-0">
+                        <i class="fas fa-calendar-alt me-2"></i>
+                        {{ month.grouper|az_month }}
+                    </h3>
+                </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-hover align-middle mb-0">
@@ -23,13 +33,15 @@
                                     <th>Ad</th>
                                     <th>Soyad</th>
                                     <th>FIN</th>
+                                    <th>Department</th>
+                                    <th>Manager</th>
                                     <th>Kayıt Tarihi</th>
                                     <th>Durum</th>
                                     <th class="text-end pe-3">İşlemler</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for agent in agents %}
+                                {% for agent in month.list %}
                                 <tr>
                                     <td class="ps-3">
                                         <div class="position-relative" style="width: 40px;">
@@ -51,12 +63,30 @@
                                     <td>{{ agent.name }}</td>
                                     <td>{{ agent.surname }}</td>
                                     <td>{{ agent.fin }}</td>
+                                    <td>
+                                        {% if agent.manager.department %}
+                                            {{ agent.manager.department.name }}
+                                        {% else %}
+                                            <span class="text-muted">-----</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if agent.manager %}
+                                            {{ agent.manager.name }} {{ agent.manager.surname }}
+                                        {% else %}
+                                            <span class="text-muted">-----</span>
+                                        {% endif %}
+                                    </td>
                                     <td>{{ agent.created_at|date:"d/m/Y" }}</td>
                                     <td>
-                                        {% if agent.status == 'active' %}
+                                        {% if agent.status in 'Passed to Training,Passed to Work' %}
                                             <span class="badge bg-success">{{ agent.get_status_display }}</span>
-                                        {% else %}
+                                        {% elif agent.status in 'Passed to Interview,Invited to Training,Invited to Work' %}
+                                            <span class="badge bg-warning">{{ agent.get_status_display }}</span>
+                                        {% elif agent.status in 'Failed to Training,Failed to Work' %}
                                             <span class="badge bg-danger">{{ agent.get_status_display }}</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">{{ agent.get_status_display }}</span>
                                         {% endif %}
                                     </td>
                                     <td class="text-end pe-3">
@@ -76,7 +106,7 @@
                                 </tr>
 
                                 <!-- Delete Modal for each agent -->
-                                <div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1" style="padding-top: 100px;">
+                                <div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
@@ -84,7 +114,7 @@
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <p class="mb-0">{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
+                                                <p>{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
                                             </div>
                                             <div class="modal-footer">
                                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
@@ -97,7 +127,7 @@
                                 </div>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="7" class="text-center py-4">
+                                    <td colspan="9" class="text-center py-4">
                                         <div class="text-muted">
                                             <i class="fas fa-info-circle me-2"></i>
                                             Henüz personel bulunmamaktadır
@@ -110,6 +140,16 @@
                     </div>
                 </div>
             </div>
+            {% empty %}
+            <div class="card shadow-sm">
+                <div class="card-body text-center py-5">
+                    <div class="text-muted">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Henüz personel bulunmamaktadır
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
         </div>
     </div>
 </div>
