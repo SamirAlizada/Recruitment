@@ -89,6 +89,7 @@
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <select class="form-select" id="id_group" name="group" required>
+                                            <option value="">Grup Seçiniz</option>
                                             {% for group in groups %}
                                             <option value="{{ group.id }}" 
                                                     {% if agent.group.id == group.id %}selected{% endif %}>
