@@ -39,3 +39,10 @@ def get_schedule(agent, date):
         return schedule.schedule_type
     except AgentSchedule.DoesNotExist:
         return None 
+
+@register.filter
+def split(value, delimiter='\n'):
+    """
+    Returns the string split by delimiter.
+    """
+    return value.split(delimiter) 
