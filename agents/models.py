@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Group(models.Model):
     name = models.CharField(max_length=100)  # Qrup adı (Səhər və ya Axşam)
@@ -18,6 +19,7 @@ class Department(models.Model):
         return self.name
 
 class Manager(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True)
     photo = models.ImageField(upload_to='manager_photos/', blank=True, null=True)
     name = models.CharField(max_length=50)
     surname = models.CharField(max_length=50)
