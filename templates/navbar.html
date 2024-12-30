@@ -1,18 +1,46 @@
+{% load static %}
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container">
-        <a class="navbar-brand" href="/">Vardiya Sistemi</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        {% if user.is_authenticated %}
+            {% if user.is_superuser %}
+                <a class="navbar-brand" href="{% url 'agent_list' %}">Recruitment</a>
+            {% else %}
+                {% if user.manager %}
+                    <a class="navbar-brand" href="{% url 'manager_detail' dept_pk=user.manager.department.id manager_pk=user.manager.id %}">Recruitment</a>
+                {% endif %}
+            {% endif %}
+        {% else %}
+            <span class="navbar-brand">Recruitment</span>
+        {% endif %}
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav me-auto">
+                {% if user.is_authenticated and user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'agent_list' %}">Agents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'group_list' %}">Groups</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'department_list' %}">Departments</a>
+                    </li>
+                {% endif %}
+            </ul>
             <ul class="navbar-nav">
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'group_list' %}">Gruplar</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'department_list' %}">Departmanlar</a>
-                </li>
-                <!-- Diğer menü öğeleri buraya eklenebilir -->
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+                {% endif %}
             </ul>
         </div>
     </div>
