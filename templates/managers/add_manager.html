@@ -1,59 +1,90 @@
-{% extends 'base.html' %}
-
-{% block title %}Yeni Yönetici Ekle{% endblock %}
+{% extends "base.html" %}
+{% load static %}
+{% load agent_filters %}
 
 {% block content %}
-<div class="container-fluid py-4">
+<div class="container mt-4">
     <div class="row justify-content-center">
-        <div class="col-12 col-lg-6">
+        <div class="col-md-8">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} mb-4">
+                        {% with message_text=message|stringformat:"s" %}
+                            {% for line in message_text|split:"\n" %}
+                                <p class="mb-1" style="white-space: pre-line;">{{ line }}</p>
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
             <div class="card shadow">
-                <div class="card-header bg-gradient-primary text-white py-3">
-                    <h2 class="h4 mb-0">
-                        <i class="fas fa-user-tie me-2"></i>
-                        Yeni Yönetici Ekle
-                    </h2>
+                <div class="card-header bg-primary text-white">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-user-plus me-2"></i>Yeni Yönetici Ekle
+                    </h3>
                 </div>
-                <div class="card-body p-4">
-                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                <div class="card-body">
+                    {% if form.errors %}
+                        <div class="alert alert-danger">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <p>{{ field.label }}: {{ error }}</p>
+                                {% endfor %}
+                            {% endfor %}
+                            {% for error in form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         
-                        <!-- Fotoğraf Yükleme -->
+                        <!-- Fotoğraf Seçimi -->
                         <div class="text-center mb-4">
                             <div class="position-relative d-inline-block">
-                                <div id="photoPreview" class="rounded-circle bg-light d-flex align-items-center justify-content-center mb-3" 
+                                <div id="photoPreview" class="rounded-circle bg-light d-flex align-items-center justify-content-center" 
                                      style="width: 150px; height: 150px; border: 2px dashed #ccc;">
-                                    <i class="fas fa-user-tie fa-4x text-muted"></i>
+                                    <i class="fas fa-user fa-4x text-muted"></i>
                                 </div>
-                                <label for="id_photo" class="btn btn-sm btn-primary position-absolute bottom-0 end-0">
+                                <label for="{{ form.photo.id_for_label }}" class="btn btn-sm btn-primary position-absolute bottom-0 end-0 rounded-circle" style="width: 32px; height: 32px;">
                                     <i class="fas fa-camera"></i>
                                 </label>
-                                <input type="file" id="id_photo" name="photo" class="d-none" accept="image/*">
+                                {{ form.photo }}
                             </div>
                         </div>
 
-                        <div class="row g-3">
-                            <!-- Yönetici Adı -->
+                        <!-- Ad ve Soyad -->
+                        <div class="row mb-3">
                             <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="id_name" name="name" required>
-                                    <label for="id_name">Adı <span class="text-danger">*</span></label>
-                                </div>
+                                <label for="{{ form.name.id_for_label }}" class="form-label">Ad</label>
+                                {{ form.name }}
                             </div>
-
-                            <!-- Yönetici Soyadı -->
                             <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="id_surname" name="surname" required>
-                                    <label for="id_surname">Soyadı <span class="text-danger">*</span></label>
-                                </div>
+                                <label for="{{ form.surname.id_for_label }}" class="form-label">Soyad</label>
+                                {{ form.surname }}
                             </div>
                         </div>
 
-                        <div class="d-flex justify-content-end gap-2 mt-4">
-                            <a href="{% url 'manager_list' %}" class="btn btn-light btn-lg px-4">
+                        <!-- Şifre ve Şifre Tekrarı -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label for="{{ form.password.id_for_label }}" class="form-label">Şifre</label>
+                                {{ form.password }}
+                            </div>
+                            <div class="col-md-6">
+                                <label for="{{ form.confirm_password.id_for_label }}" class="form-label">Şifre (Tekrar)</label>
+                                {{ form.confirm_password }}
+                            </div>
+                        </div>
+
+                        <!-- Butonlar -->
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="{% url 'department_detail' pk=department.id %}" class="btn btn-light">
                                 <i class="fas fa-times me-2"></i>İptal
                             </a>
-                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                            <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-save me-2"></i>Kaydet
                             </button>
                         </div>
@@ -65,19 +96,66 @@
 </div>
 
 <style>
-.bg-gradient-primary {
-    background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+.card {
+    border: none;
+    border-radius: 10px;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 1rem;
 }
 
 .form-control:focus {
-    border-color: #4e73df;
-    box-shadow: 0 0 0 0.25rem rgba(78, 115, 223, 0.25);
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+#photoPreview {
+    transition: all 0.3s ease;
+}
+
+#photoPreview:hover {
+    border-color: #80bdff;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background-color: #0d6efd;
+    border-color: #0d6efd;
+}
+
+.btn-primary:hover {
+    background-color: #0b5ed7;
+    border-color: #0a58ca;
+}
+
+.btn-light {
+    background-color: #f8f9fa;
+    border-color: #f8f9fa;
+}
+
+.btn-light:hover {
+    background-color: #e2e6ea;
+    border-color: #dae0e5;
+}
+
+.alert {
+    margin-bottom: 1rem;
+}
+
+.alert p {
+    margin-bottom: 0.5rem;
+}
+
+.alert p:last-child {
+    margin-bottom: 0;
 }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const photoInput = document.getElementById('id_photo');
+    const photoInput = document.getElementById('{{ form.photo.id_for_label }}');
     const photoPreview = document.getElementById('photoPreview');
 
     photoInput.addEventListener('change', function(e) {
@@ -90,14 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Form validation
-    const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-        if (!form.checkValidity()) {
-            event.preventDefault();
-            event.stopPropagation();
-        }
-        form.classList.add('was-validated');
+    photoPreview.addEventListener('click', function() {
+        photoInput.click();
     });
 });
 </script>
