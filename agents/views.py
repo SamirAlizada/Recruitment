@@ -1,5 +1,5 @@
 # agents/views.py
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from .models import Agent, Group, Manager, Department, AgentSchedule
 from django.shortcuts import redirect, get_object_or_404, render
@@ -9,6 +9,12 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django import forms
 import logging
+from django.contrib.auth.models import User
+from django.core.exceptions import PermissionDenied
+from django.contrib.auth import authenticate, login
+
+def is_superuser(user):
+    return user.is_superuser
 
 # Logging yapılandırması
 logger = logging.getLogger(__name__)
@@ -47,6 +53,7 @@ def az_month(value):
     return value
 
 @login_required
+@user_passes_test(is_superuser)
 def agent_list(request):
     agents = Agent.objects.all().order_by('-created_at')
     return render(request, 'agent_list.html', {'agents': agents})
@@ -67,6 +74,7 @@ def agent_list(request):
 #     return render(request, 'add_agent.html', {'form': form})
 
 @login_required
+@user_passes_test(is_superuser)
 def add_agent(request):    
     if request.method == 'POST':
         form = AgentForm(request.POST, request.FILES)
@@ -236,17 +244,20 @@ def delete_agent(request, agent_id):
         messages.error(request, f'Bir hata oluştu: {str(e)}')
         return redirect('agent_list')
 
+@login_required
+@user_passes_test(is_superuser)
 def group_list(request):
-    groups = Group.objects.all()  # Bütün qrupları gətir
+    groups = Group.objects.all()
     return render(request, 'groups/group_list.html', {'groups': groups})
 
+@login_required
+@user_passes_test(is_superuser)
 def group_detail(request, group_id):
     group = get_object_or_404(Group, id=group_id)
     agents = group.agent_set.all().prefetch_related('agentschedule_set')
-    agents = Agent.objects.filter(group=group)  # Qrupdakı agentləri gətir
+    agents = Agent.objects.filter(group=group)
     days = ['I', 'II', 'III', 'IV', 'V']
     
-    # AJAX isteği için
     if request.method == 'POST' and request.headers.get('X-Requested-With') == 'XMLHttpRequest':
         agent_id = request.POST.get('agent_id')
         date = request.POST.get('date')
@@ -261,12 +272,10 @@ def group_detail(request, group_id):
         
         return JsonResponse({'status': 'success'})
     
-    # Cari həftənin başlanğıc və son tarixlərini hesablayaq
     today = datetime.now()
-    monday = today - timedelta(days=today.weekday())  # Həftənin ilk günü
-    friday = monday + timedelta(days=4)  # Həftənin son günü
+    monday = today - timedelta(days=today.weekday())
+    friday = monday + timedelta(days=4)
     
-    # Hər günün tarixini saxlayaq
     week_dates = [(monday + timedelta(days=i)).date() for i in range(5)]
     
     return render(request, 'groups/group_detail.html', {
@@ -275,100 +284,109 @@ def group_detail(request, group_id):
         'week_end': friday.date(),
         'week_dates': week_dates,
         'current_date': today.date(),
-        })
-
-def manager_list(request):
-    managers = Manager.objects.all()  # Bütün qrupları gətir
-    return render(request, 'managers/manager_list.html', {'managers': managers})
-
-def manager_detail(request, dept_pk, manager_pk):
-    department = get_object_or_404(Department, pk=dept_pk)
-    manager = get_object_or_404(Manager, pk=manager_pk, department=department)
-    # Manager'a bağlı agent'ları getir
-    agents = Agent.objects.filter(manager=manager)
-    
-    return render(request, 'managers/manager_detail.html', {
-        'department': department,
-        'manager': manager,
-        'agents': agents  # Template'e agents'ları gönder
     })
 
 @login_required
+@user_passes_test(is_superuser)
+def manager_list(request):
+    managers = Manager.objects.all()
+    return render(request, 'managers/manager_list.html', {'managers': managers})
+
+@login_required
+def manager_detail(request, dept_pk, manager_pk):
+    department = get_object_or_404(Department, pk=dept_pk)
+    manager = get_object_or_404(Manager, pk=manager_pk, department=department)
+    agents = Agent.objects.filter(manager=manager)
+
+    # Toplam değerleri hesapla
+    total_icbari_1 = sum(agent.icbari_1 or 0 for agent in agents)
+    total_icbari_2 = sum(agent.icbari_2 or 0 for agent in agents)
+    total_konullu_1 = sum(agent.konullu_1 or 0 for agent in agents)
+    total_konullu_2 = sum(agent.konullu_2 or 0 for agent in agents)
+
+    context = {
+        'department': department,
+        'manager': manager,
+        'agents': agents,
+        'total_icbari_1': total_icbari_1,
+        'total_icbari_2': total_icbari_2,
+        'total_konullu_1': total_konullu_1,
+        'total_konullu_2': total_konullu_2,
+    }
+    return render(request, 'managers/manager_detail.html', context)
+
+@login_required
+@user_passes_test(is_superuser)
 def add_manager(request, dept_pk=None):
-    if request.method == 'POST':
-        form = ManagerForm(request.POST, request.FILES)
-        if form.is_valid():
-            manager = form.save(commit=False)
-            if dept_pk:
-                department = get_object_or_404(Department, pk=dept_pk)
-                manager.department = department
-            manager.save()
-            messages.success(request, 'Yönetici başarıyla eklendi.')
-            if dept_pk:
-                return redirect('department_detail', pk=dept_pk)
-            return redirect('manager_list')
-        else:
-            messages.error(request, 'Form doldurulurken bir hata oluştu. Lütfen tekrar deneyin.')
-    else:
-        form = ManagerForm()
+    department = get_object_or_404(Department, pk=dept_pk) if dept_pk else None
     
-    return render(request, 'managers/add_manager.html', {'form': form})
+    if request.method == 'POST':
+        form = ManagerForm(request.POST, request.FILES, department=department)
+        if form.is_valid():
+            manager = form.save()
+            success_message = (
+                "✅ Yönetici başarıyla eklendi!\n\n"
+                "📋 Giriş Bilgileri:\n"
+                f"👤 Kullanıcı adı: {manager.user.username}\n"
+                f"🔑 Şifre: {form.cleaned_data['password']}\n\n"
+                "⚠️ Lütfen bu bilgileri yöneticiye güvenli bir şekilde iletin."
+            )
+            messages.success(request, success_message)
+            return redirect('department_detail', pk=dept_pk)
+    else:
+        form = ManagerForm(department=department)
+    
+    return render(request, 'managers/add_manager.html', {
+        'form': form,
+        'department': department
+    })
 
 @login_required
 def edit_manager(request, dept_pk, manager_pk):
-    try:
-        department = get_object_or_404(Department, pk=dept_pk)
-        manager = get_object_or_404(Manager, pk=manager_pk)
-        
-        if request.method == 'POST':
-            print("POST request alındı")  # Debug için
-            print("FILES:", request.FILES)  # Yüklenen dosyaları kontrol et
-            
-            # Form verilerini al
-            name = request.POST.get('name')
-            surname = request.POST.get('surname')
-            photo = request.FILES.get('photo')
-            
-            print(f"Name: {name}, Surname: {surname}, Photo: {photo}")  # Debug için
-            
-            # Verileri güncelle
-            manager.name = name
-            manager.surname = surname
-            
-            if photo:
-                print("Yeni fotoğraf yükleniyor...")  # Debug için
-                # Eski fotoğrafı sil
-                if manager.photo:
-                    try:
-                        manager.photo.delete(save=False)
-                    except Exception as e:
-                        print(f"Eski fotoğraf silinirken hata: {e}")
-                
-                # Yeni fotoğrafı kaydet
-                manager.photo = photo
-            
-            manager.save()
-            messages.success(request, 'Yönetici başarıyla güncellendi.')
-            return redirect('department_detail', pk=dept_pk)
-            
-    except Exception as e:
-        print(f"Hata oluştu: {e}")  # Debug için
-        messages.error(request, f'Bir hata oluştu: {str(e)}')
+    department = get_object_or_404(Department, pk=dept_pk)
+    manager = get_object_or_404(Manager, pk=manager_pk)
     
+    # Sadece superuser veya ilgili manager erişebilir
+    if not request.user.is_superuser:
+        if not hasattr(request.user, 'manager') or request.user.manager != manager:
+            raise PermissionDenied
+    
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        surname = request.POST.get('surname')
+        photo = request.FILES.get('photo')
+        
+        manager.name = name
+        manager.surname = surname
+        
+        if photo:
+            if manager.photo:
+                manager.photo.delete(save=False)
+            manager.photo = photo
+        
+        manager.save()
+        messages.success(request, 'Yönetici başarıyla güncellendi.')
+        return redirect('department_detail', pk=dept_pk)
+            
     return render(request, 'managers/manager_form.html', {
         'manager': manager,
         'department': department
     })
 
 @login_required
+@user_passes_test(is_superuser)
 def delete_manager(request, dept_pk, manager_pk):
     manager = get_object_or_404(Manager, pk=manager_pk)
     if request.method == 'POST':
+        if manager.user:
+            manager.user.delete()  # İlişkili user'ı da sil
         manager.delete()
         messages.success(request, 'Yönetici başarıyla silindi.')
         return redirect('department_detail', pk=dept_pk)
     return redirect('department_detail', pk=dept_pk)
 
+@login_required
+@user_passes_test(is_superuser)
 def department_list(request):
     departments = Department.objects.all()
     return render(request, 'departments/department_list.html', {'departments': departments})
@@ -404,11 +422,12 @@ def delete_department(request, pk):
         return redirect('department_list')
     return redirect('department_list')
 
+@login_required
+@user_passes_test(is_superuser)
 def department_detail(request, pk):
     department = get_object_or_404(Department, pk=pk)
     managers = department.manager_set.all()
     
-    # Her manager için agent sayısını hesapla
     for manager in managers:
         manager.agent_count = Agent.objects.filter(manager=manager).count()
 
@@ -494,3 +513,32 @@ def agent_delete(request, pk):
         if referer_url:
             return redirect(referer_url)
         return redirect('agent_list')
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user is not None:
+            login(request, user)
+            
+            # Eğer superuser ise ana sayfaya yönlendir
+            if user.is_superuser:
+                return redirect('agent_list')
+            
+            # Manager ise kendi sayfasına yönlendir
+            try:
+                if hasattr(user, 'manager'):
+                    return redirect('manager_detail', 
+                                 dept_pk=user.manager.department.id, 
+                                 manager_pk=user.manager.id)
+            except:
+                pass
+            
+            # Diğer durumlar için ana sayfaya yönlendir
+            return redirect('agent_list')
+        else:
+            messages.error(request, 'Kullanıcı adı veya şifre hatalı.')
+    
+    return render(request, 'registration/login.html')
