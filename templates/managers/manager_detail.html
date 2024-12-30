@@ -1,148 +1,266 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ manager.name }} - Yönetici Detayı{% endblock %}
-
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-12 col-xl-10">
-            <div class="d-flex flex-column mb-4">
-                <h1 class="h4 mb-2">{{ manager.department.name }}</h1>
-                <h2 class="h5 mb-0">Yönetici: {{ manager.name }} {{ manager.surname }}</h2>
-            </div>
-            <div class="card shadow-sm">
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead>
-                            <tr>
-                                <th class="border-0 py-3 text-white" style="width: 80px; background-color: #17386b;">
-                                    <span class="small text-uppercase">Fotoğraf</span>
-                                </th>
-                                <th class="border-0 py-3 text-white" style="width: 150px; background-color: #17386b;">
-                                    <span class="small text-uppercase">Ad</span>
-                                </th>
-                                <th class="border-0 py-3 text-white" style="width: 150px; background-color: #17386b;">
-                                    <span class="small text-uppercase">Soyad</span>
-                                </th>
-                                <th class="border-0 py-3 text-white" style="width: 200px; background-color: #17386b;">
-                                    <span class="small text-uppercase">İcbari</span>
-                                </th>
-                                <th class="border-0 py-3 text-white" style="width: 200px; background-color: #17386b;">
-                                    <span class="small text-uppercase">Könüllü</span>
-                                </th>
-                                <th class="border-0 py-3 text-white text-center" style="width: 120px; background-color: #17386b;">
-                                    <span class="small text-uppercase">İşlemler</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for agent in agents %}
-                            <tr data-agent-id="{{ agent.id }}" class="{% if agent.status == 'Failed to Work' %}table-danger{% endif %}">
-                                <td>
-                                    {% if agent.photo %}
-                                        <img src="{{ agent.photo.url }}" 
-                                             alt="{{ agent.name }}" 
-                                             class="rounded-circle border shadow-sm agent-photo" 
-                                             style="width: 40px; height: 40px; object-fit: cover;">
-                                    {% else %}
-                                        <div class="rounded-circle border bg-secondary d-flex align-items-center justify-content-center agent-photo" 
-                                             style="width: 40px; height: 40px;">
-                                            <i class="fas fa-user text-white"></i>
-                                        </div>
-                                    {% endif %}
-                                </td>
-                                <td class="fw-medium">{{ agent.name }}</td>
-                                <td>{{ agent.surname }}</td>
-                                <td>
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Say:</span>
-                                        <input type="number" 
-                                               class="form-control form-control-sm bg-light" 
-                                               style="width: 90px;"
-                                               value="{{ agent.icbari_1|default_if_none:'' }}"
-                                               {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
-                                               data-field="icbari_1"
-                                               onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Ümumi:</span>
-                                        <input type="number" 
-                                            class="form-control form-control-sm bg-light"
-                                            style="width: 90px;" 
-                                            value="{{ agent.icbari_2|default_if_none:'' }}"
-                                            {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
-                                            data-field="icbari_2"
-                                            step="0.01">
-                                    </div>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center mb-2">
-                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Say:</span>
-                                        <input type="number" 
-                                            class="form-control form-control-sm bg-light"
-                                            style="width: 90px;" 
-                                            value="{{ agent.konullu_1|default_if_none:'' }}"
-                                            {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
-                                            data-field="konullu_1"
-                                            onkeypress="return event.charCode >= 48 && event.charCode <= 57">
-                                    </div>
-                                    <div class="d-flex align-items-center">
-                                        <span class="text-bold me-2" style="font-size: 0.85rem; width: 60px;">Ümumi:</span>
-                                        <input type="number" 
-                                               class="form-control form-control-sm bg-light"
-                                               style="width: 90px;" 
-                                               value="{{ agent.konullu_2|default_if_none:'' }}"
-                                               {% if agent.status == 'Failed to Work' %}disabled="disabled"{% endif %}
-                                               data-field="konullu_2"
-                                               step="0.01">
-                                    </div>
-                                </td>
-                                <td class="text-center">
-                                    <a href="{% url 'edit_agent' agent.id %}" 
-                                       class="btn btn-primary btn-sm px-3 mb-1 w-100">
-                                       <i class="fas fa-edit me-1"></i>Düzenle
-                                    </a>
-                                    <button type="button" 
-                                            class="btn btn-danger btn-sm px-3 w-100"
-                                            data-bs-toggle="modal" 
-                                            data-bs-target="#deleteModal{{ agent.id }}">
-                                        <i class="fas fa-trash me-1"></i>Sil
-                                    </button>
-                                </td>
-                            </tr>
-                            {% empty %}
-                            <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">
-                                    Bu yöneticide personel bulunmamaktadır.
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
+<div class="container mt-4">
+    <div class="card shadow-sm hover-shadow mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center mb-3">
+                        {% if manager.photo %}
+                            <div class="photo-zoom">
+                                <img src="{{ manager.photo.url }}" alt="{{ manager.name }}" class="rounded-circle me-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;">
+                            </div>
+                        {% else %}
+                            <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center me-3 shadow-sm" style="width: 60px; height: 60px;">
+                                <i class="fas fa-user text-white fa-2x"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h4 class="mb-1">{{ department.name }}</h4>
+                            <h5 class="text-muted mb-0">{{ manager.name }} {{ manager.surname }}</h5>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="mt-4">
-                <a href="{% url 'department_detail' manager.department.id %}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left me-1"></i>
-                    {{ manager.department.name }} Departmanına Geri Dön
-                </a>
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <h5 class="card-title mb-3">Toplam Değerler</h5>
+                            <div class="row">
+                                <div class="col-12 mb-2">
+                                    <strong>İcbari:</strong> {{ total_icbari_1 }} - {{ total_icbari_2 }} ₼
+                                </div>
+                                <div class="col-12">
+                                    <strong>Könüllü:</strong> {{ total_konullu_1 }} - {{ total_konullu_2 }} ₼
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+
+    <div class="card shadow">
+        <div class="card-header bg-dark text-white py-3">
+            <h5 class="mb-0">Agent Listesi</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="py-3" style="width: 80px;">FOTOĞRAF</th>
+                            <th class="py-3">AD</th>
+                            <th class="py-3">SOYAD</th>
+                            <th class="py-3" style="width: 250px;">İCBARİ</th>
+                            <th class="py-3" style="width: 250px;">KÖNÜLLÜ</th>
+                            <th class="py-3 text-end" style="width: 180px;">İŞLEMLER</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for agent in agents %}
+                        <tr>
+                            <td class="py-3">
+                                <div class="photo-zoom">
+                                    {% if agent.photo %}
+                                        <img src="{{ agent.photo.url }}" alt="{{ agent.name }}" class="rounded-circle shadow-sm" style="width: 40px; height: 40px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user text-white"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </td>
+                            <td class="py-3">{{ agent.name }}</td>
+                            <td class="py-3">{{ agent.surname }}</td>
+                            <td class="py-3">
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text fixed-width">Say:</span>
+                                            <input type="number" class="form-control" value="{{ agent.icbari_1|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="icbari_1">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text fixed-width">Ümumi:</span>
+                                            <input type="number" step="0.01" class="form-control" value="{{ agent.icbari_2|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="icbari_2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3">
+                                <div class="row g-2">
+                                    <div class="col-12">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text fixed-width">Say:</span>
+                                            <input type="number" class="form-control" value="{{ agent.konullu_1|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="konullu_1">
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="input-group input-group-sm">
+                                            <span class="input-group-text fixed-width">Ümumi:</span>
+                                            <input type="number" step="0.01" class="form-control" value="{{ agent.konullu_2|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="konullu_2">
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="py-3 text-end">
+                                <a href="{% url 'edit_agent' pk=agent.id %}" class="btn btn-primary btn-sm me-1">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button class="btn btn-danger btn-sm delete-agent" data-agent-id="{{ agent.id }}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                Henüz agent bulunmamaktadır.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_superuser %}
+    <div class="mt-4">
+        <a href="{% url 'department_detail' pk=department.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>{{ department.name }} Departmanına Geri Dön
+        </a>
+    </div>
+    {% endif %}
 </div>
+
+<style>
+.card {
+    border: none;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+}
+
+.hover-shadow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.shadow {
+    box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+}
+
+.shadow-sm {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075)!important;
+}
+
+.card-header {
+    border-radius: 10px 10px 0 0 !important;
+    padding: 1rem;
+}
+
+.table > :not(caption) > * > * {
+    padding: 1rem 1rem;
+    vertical-align: middle;
+}
+
+.input-group-text {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.fixed-width {
+    min-width: 70px;
+    justify-content: flex-end;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+/* Fotoğraf zoom efekti */
+.photo-zoom {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.photo-zoom img, .photo-zoom div {
+    transition: transform 0.3s ease;
+}
+
+.photo-zoom:hover img, .photo-zoom:hover div {
+    transform: scale(1.8);
+    z-index: 1000;
+}
+
+/* Mobil görünüm için düzenlemeler */
+@media (max-width: 768px) {
+    .table td {
+        padding: 0.75rem !important;
+    }
+    
+    .input-group {
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group-text {
+        font-size: 0.875rem;
+    }
+    
+    .form-control {
+        font-size: 0.875rem;
+    }
+    
+    .photo-zoom:hover img, .photo-zoom:hover div {
+        transform: scale(2);
+    }
+}
+
+.is-valid {
+    border-color: #198754 !important;
+    padding-right: calc(1.5em + 0.75rem) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3e%3cpath fill='%23198754' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right calc(0.375em + 0.1875rem) center !important;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+}
+
+.is-invalid {
+    border-color: #dc3545 !important;
+    padding-right: calc(1.5em + 0.75rem) !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right calc(0.375em + 0.1875rem) center !important;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem) !important;
+}
+</style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const inputs = document.querySelectorAll('input[type="number"]');
-    
-    inputs.forEach(input => {
+    // Input değişikliklerini dinle
+    document.querySelectorAll('input[data-agent-id]').forEach(input => {
         input.addEventListener('change', function() {
-            const agentId = this.closest('tr').dataset.agentId;
-            const fieldName = this.dataset.field;
+            const agentId = this.dataset.agentId;
+            const field = this.dataset.field;
             const value = this.value;
 
-            fetch('{% url "update_agent_values" %}', {
+            // AJAX isteği gönder
+            fetch('/update-agent-values/', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -150,33 +268,64 @@ document.addEventListener('DOMContentLoaded', function() {
                 },
                 body: JSON.stringify({
                     agent_id: agentId,
-                    field: fieldName,
+                    field: field,
                     value: value
                 })
             })
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    // Değeri güncelle
-                    input.value = data.value !== null ? data.value : '';
+                    this.classList.add('is-valid');
+                    this.classList.remove('is-invalid');
                     
-                    // Başarı göstergesi
-                    input.classList.add('is-valid');
-                    setTimeout(() => input.classList.remove('is-valid'), 1000);
+                    // Sayfayı yenile
+                    setTimeout(() => {
+                        location.reload();
+                    }, 500);
                 } else {
-                    input.classList.add('is-invalid');
-                    setTimeout(() => input.classList.remove('is-invalid'), 1000);
+                    this.classList.add('is-invalid');
+                    this.classList.remove('is-valid');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                input.classList.add('is-invalid');
-                setTimeout(() => input.classList.remove('is-invalid'), 1000);
+                this.classList.add('is-invalid');
+                this.classList.remove('is-valid');
             });
         });
     });
 
-    // CSRF token alma fonksiyonu
+    // Delete agent işlemi
+    document.querySelectorAll('.delete-agent').forEach(button => {
+        button.addEventListener('click', function() {
+            if (confirm('Bu agent\'ı silmek istediğinizden emin misiniz?')) {
+                const agentId = this.dataset.agentId;
+                
+                fetch(`/delete-agent/${agentId}/?source=manager_detail`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken'),
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        // Agent başarıyla silindi, sayfayı yenile
+                        location.reload();
+                    } else {
+                        alert('Agent silinirken bir hata oluştu.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Agent silinirken bir hata oluştu.');
+                });
+            }
+        });
+    });
+
+    // CSRF token'ı almak için yardımcı fonksiyon
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -191,106 +340,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return cookieValue;
     }
-
-    // Silme fonksiyonu
-    window.deleteAgent = function(agentId) {
-        // Mevcut URL'den source parametresini al
-        const currentPath = window.location.pathname;
-        let source = 'agent_list';
-        
-        if (currentPath.includes('/managers/')) {
-            source = 'manager_detail';
-        } else if (currentPath.includes('/groups/')) {
-            source = 'group_detail';
-        }
-
-        fetch(`/agents/${agentId}/delete/?source=${source}`, {
-            method: 'POST',
-            headers: {
-                'X-CSRFToken': getCookie('csrftoken'),
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.status === 'success') {
-                // Silme başarılı olduğunda satırı kaldır
-                const row = document.querySelector(`tr[data-agent-id="${agentId}"]`);
-                if (row) {
-                    row.remove();
-                }
-                
-                // Modalı kapat
-                const modal = document.getElementById(`deleteModal${agentId}`);
-                const bootstrapModal = bootstrap.Modal.getInstance(modal);
-                bootstrapModal.hide();
-
-            } else {
-                alert('Silme işlemi sırasında bir hata oluştu.');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            alert('Silme işlemi sırasında bir hata oluştu.');
-        });
-    }
 });
 </script>
-
-<!-- Her agent için modal -->
-{% for agent in agents %}
-<div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog" style="margin-top: 10vh;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Personel Silme Onayı</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <p class="mb-0">{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
-                <button type="button" 
-                        class="btn btn-danger delete-agent" 
-                        data-agent-id="{{ agent.id }}"
-                        onclick="deleteAgent({{ agent.id }})">
-                    Sil
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-{% endfor %}
-
-<style>
-    .agent-photo {
-        transition: transform 0.2s ease;
-        cursor: pointer;
-    }
-    .agent-photo:hover {
-        transform: scale(1.5);
-        z-index: 1000;
-    }
-
-    .table-danger {
-        background-color: #ffebee !important;
-    }
-
-    .table-danger:hover {
-        background-color: #ffcdd2 !important;
-    }
-
-    .table-danger td {
-        background-color: #ffebee !important;
-    }
-
-    .table-danger input:disabled {
-        background-color: #ffebee !important;
-        opacity: 0.7;
-        cursor: not-allowed;
-    }
-</style>
-
 {% endblock %}
