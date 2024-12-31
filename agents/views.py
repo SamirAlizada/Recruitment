@@ -73,6 +73,28 @@ def agent_list(request):
 #         form = AgentForm()
 #     return render(request, 'add_agent.html', {'form': form})
 
+# @login_required
+# @user_passes_test(is_superuser)
+# def add_agent(request):    
+#     if request.method == 'POST':
+#         form = AgentForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, 'Personel başarıyla eklendi.')
+#             return redirect('agent_list')
+#         else:
+#             messages.error(request, 'Form doldurulurken bir hata oluştu. Lütfen tekrar deneyin.')
+#     else:
+#         form = AgentForm()
+
+#     context = {
+#         'form': form,
+#         'status_choices': Agent._meta.get_field('status').choices,
+#         'groups': Group.objects.all()
+#     }
+#     return render(request, 'add_agent.html', context)
+
+
 @login_required
 @user_passes_test(is_superuser)
 def add_agent(request):    
@@ -84,13 +106,20 @@ def add_agent(request):
             return redirect('agent_list')
         else:
             messages.error(request, 'Form doldurulurken bir hata oluştu. Lütfen tekrar deneyin.')
+            print(form.errors)  # Hata mesajlarını yazdır
+            print(request.POST)  # Gönderilen verileri yazdır
+            group_id = request.POST.get('group')
+            print(f"Group ID Sent: {group_id}")  # Gönderilen grup ID'si
+            print(f"Available Groups: {[group.id for group in Group.objects.all()]}")  # Mevcut gruplar kontrolü
     else:
         form = AgentForm()
+
+    groups = Group.objects.all()
 
     context = {
         'form': form,
         'status_choices': Agent._meta.get_field('status').choices,
-        'groups': Group.objects.all()
+        'groups': groups,
     }
     return render(request, 'add_agent.html', context)
 
