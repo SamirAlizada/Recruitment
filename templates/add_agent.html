@@ -33,16 +33,18 @@
                             </div>
 
                             <!-- İsim ve Soyisim -->
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="id_name" name="name" required>
-                                    <label for="id_name">İsim <span class="text-danger">*</span></label>
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="id_name" name="name" required>
+                                        <label for="id_name">İsim <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-floating">
-                                    <input type="text" class="form-control" id="id_surname" name="surname" required>
-                                    <label for="id_surname">Soyisim <span class="text-danger">*</span></label>
+                                <div class="col-md-6">
+                                    <div class="form-floating">
+                                        <input type="text" class="form-control" id="id_surname" name="surname" required>
+                                        <label for="id_surname">Soyisim <span class="text-danger">*</span></label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -90,7 +92,7 @@
                                 
                                 <div class="col-md-6">
                                     <div class="form-floating">
-                                        <select class="form-select" id="id_group" name="group" required>
+                                        <select class="form-select" id="id_group" name="group">
                                             <option value="">Seçiniz</option>
                                             {% for group in groups %}
                                             <option value="{{ group.id }}">{{ group.name }}</option>
@@ -120,6 +122,10 @@
 <style>
 .bg-gradient-primary {
     background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
+}
+
+.form-floating {
+    width: 100%; /* Tüm form alanlarının genişliğini ayarlar */
 }
 
 .form-floating > label {
