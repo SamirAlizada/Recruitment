@@ -5,12 +5,12 @@ from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 
 class AgentForm(forms.ModelForm):
-    group = forms.ModelChoiceField(
-        queryset=Group.objects.all(),
-        widget=forms.Select(attrs={'class': 'form-control'}),
-        required=False,
-        empty_label="-----"
-    )
+    # group = forms.ModelChoiceField(
+    #     queryset=Group.objects.all(),
+    #     widget=forms.Select(attrs={'class': 'form-control'}),
+    #     required=False,
+    #     empty_label="-----"
+    # )
 
     class Meta:
         model = Agent
@@ -23,6 +23,10 @@ class AgentForm(forms.ModelForm):
             'status': forms.Select(attrs={'class': 'form-control'}),
             'photo': forms.FileInput(attrs={'class': 'form-control'}),
         }
+
+        def __init__(self, *args, **kwargs):
+            super(AgentForm, self).__init__(*args, **kwargs)
+            self.fields['group'].queryset = Group.objects.all()  # Dinamik olarak ayarla
 
 class ManagerForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), required=True)
