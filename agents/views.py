@@ -102,10 +102,10 @@ def add_agent(request):
         form = AgentForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Personel başarıyla eklendi.')
+            messages.success(request, 'Agent uğurla əlavə edildi.')
             return redirect('agent_list')
         else:
-            messages.error(request, 'Form doldurulurken bir hata oluştu. Lütfen tekrar deneyin.')
+            messages.error(request, 'Formanı doldurarkən xəta baş verdi. Yenidən cəhd edin.')
             print(form.errors)  # Hata mesajlarını yazdır
             print(request.POST)  # Gönderilen verileri yazdır
             group_id = request.POST.get('group')
@@ -152,14 +152,14 @@ def get_department_managers(request, dept_id):
                 'surname': manager.surname
             }
             manager_list.append(manager_data)
-            logger.debug(f"Yönetici eklendi: {manager_data}")
+            logger.debug(f"Menecer əlavə edildi: {manager_data}")
         
         logger.debug(f"Dönülen manager listesi: {manager_list}")
         return JsonResponse(manager_list, safe=False)
         
     except Department.DoesNotExist:
         logger.error(f"Departman bulunamadı: {dept_id}")
-        return JsonResponse({'error': 'Departman bulunamadı'}, status=404)
+        return JsonResponse({'error': 'Şöbə tapılmadı'}, status=404)
     except Exception as e:
         logger.error(f"Beklenmeyen hata: {str(e)}")
         return JsonResponse({'error': str(e)}, status=500)
@@ -183,7 +183,7 @@ def edit_agent(request, pk):
                     selected_manager = get_object_or_404(Manager, id=manager_id, department_id=department_id)
                     agent.manager = selected_manager
                 else:
-                    form.add_error(None, 'Bu status için departman ve yönetici seçimi zorunludur.')
+                    form.add_error(None, 'Bu status üçün şöbə və menecerin seçilməsi məcburidir.')
                     return render(request, 'agents/edit_agent.html', {
                         'form': form,
                         'agent': agent,
@@ -191,13 +191,13 @@ def edit_agent(request, pk):
                         'managers': managers,
                         'status_choices': Agent._meta.get_field('status').choices,
                         'groups': Group.objects.all(),
-                        'title': 'Agent Düzenle'
+                        'title': 'Agentə Düzəliş Et'
                     })
             else:
                 agent.manager = None
             
             agent.save()
-            messages.success(request, 'Agent başarıyla güncellendi.')
+            messages.success(request, 'Agent uğurla yeniləndi.')
             
             # Form gönderildiğinde session'da saklanan referer URL'e yönlendir
             previous_url = request.session.get('previous_url')
@@ -225,7 +225,7 @@ def edit_agent(request, pk):
         'managers': managers,
         'status_choices': Agent._meta.get_field('status').choices,
         'groups': Group.objects.all(),
-        'title': 'Agent Düzenle'
+        'title': 'Agentə Düzəliş Et'
     })
 
 from django.http import JsonResponse
@@ -252,25 +252,25 @@ def delete_agent(request, agent_id):
             
         # Normal form submit ise, kaynağa göre yönlendir
         if source == 'group_detail' and group_id:
-            messages.success(request, 'Personel başarıyla silindi.')
+            messages.success(request, 'Agent uğurla silindi.')
             return redirect('group_detail', group_id=group_id)
         elif source == 'manager_detail' and manager_id and department_id:
-            messages.success(request, 'Personel başarıyla silindi.')
+            messages.success(request, 'Agent uğurla silindi.')
             return redirect('manager_detail', dept_pk=department_id, manager_pk=manager_id)
         else:
-            messages.success(request, 'Personel başarıyla silindi.')
+            messages.success(request, 'Agent uğurla silindi.')
             return redirect('agent_list')
             
     except Agent.DoesNotExist:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-            return JsonResponse({'status': 'error', 'message': 'Personel bulunamadı'}, status=404)
-        messages.error(request, 'Personel bulunamadı.')
+            return JsonResponse({'status': 'error', 'message': 'Agent tapılmadı'}, status=404)
+        messages.error(request, 'Agent tapılmadı.')
         return redirect('agent_list')
         
     except Exception as e:
         if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
-        messages.error(request, f'Bir hata oluştu: {str(e)}')
+        messages.error(request, f'Xəta baş verdi: {str(e)}')
         return redirect('agent_list')
 
 @login_required
@@ -354,11 +354,11 @@ def add_manager(request, dept_pk=None):
         if form.is_valid():
             manager = form.save()
             success_message = (
-                "✅ Yönetici başarıyla eklendi!\n\n"
-                "📋 Giriş Bilgileri:\n"
-                f"👤 Kullanıcı adı: {manager.user.username}\n"
-                f"🔑 Şifre: {form.cleaned_data['password']}\n\n"
-                "⚠️ Lütfen bu bilgileri yöneticiye güvenli bir şekilde iletin."
+                "✅ Menecer uğurla əlavə edildi!\n\n"
+                "📋 Giriş Məlumatı:\n"
+                f"👤 İstifadəçi adı: {manager.user.username}\n"
+                f"🔑 Şifrə: {form.cleaned_data['password']}\n\n"
+                "⚠️ Zəhmət olmasa bu məlumatı təhlükəsiz şəkildə menecerə yönləndirin."
             )
             messages.success(request, success_message)
             return redirect('department_detail', pk=dept_pk)
@@ -394,7 +394,7 @@ def edit_manager(request, dept_pk, manager_pk):
             manager.photo = photo
         
         manager.save()
-        messages.success(request, 'Yönetici başarıyla güncellendi.')
+        messages.success(request, 'Menecer uğurıa yeniləndi.')
         return redirect('department_detail', pk=dept_pk)
             
     return render(request, 'managers/manager_form.html', {
@@ -410,7 +410,7 @@ def delete_manager(request, dept_pk, manager_pk):
         if manager.user:
             manager.user.delete()  # İlişkili user'ı da sil
         manager.delete()
-        messages.success(request, 'Yönetici başarıyla silindi.')
+        messages.success(request, 'Menecer uğurla silindi.')
         return redirect('department_detail', pk=dept_pk)
     return redirect('department_detail', pk=dept_pk)
 
@@ -425,11 +425,11 @@ def add_department(request):
         form = DepartmentForm(request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Departman başarıyla oluşturuldu.')
+            messages.success(request, 'Şöbə uğurla yaradıldı.')
             return redirect('department_list')
     else:
         form = DepartmentForm()
-    return render(request, 'departments/department_form.html', {'form': form, 'title': 'Yeni Departman'})
+    return render(request, 'departments/department_form.html', {'form': form, 'title': 'Yeni Şöbə'})
 
 def edit_department(request, pk):
     department = get_object_or_404(Department, pk=pk)
@@ -437,17 +437,17 @@ def edit_department(request, pk):
         form = DepartmentForm(request.POST, instance=department)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Departman başarıyla güncellendi.')
+            messages.success(request, 'Şöbə uğurla yeniləndi.')
             return redirect('department_list')
     else:
         form = DepartmentForm(instance=department)
-    return render(request, 'departments/department_form.html', {'form': form, 'title': 'Departman Düzenle'})
+    return render(request, 'departments/department_form.html', {'form': form, 'title': 'Şöbəyə Düzəliş Et'})
 
 def delete_department(request, pk):
     department = get_object_or_404(Department, pk=pk)
     if request.method == 'POST':
         department.delete()
-        messages.success(request, 'Departman başarıyla silindi.')
+        messages.success(request, 'Şöbə uğurla silindi.')
         return redirect('department_list')
     return redirect('department_list')
 
@@ -464,7 +464,7 @@ def department_detail(request, pk):
         form = ManagerForm(request.POST, department=department)
         if form.is_valid():
             form.save()
-            messages.success(request, 'Yönetici başarıyla eklendi.')
+            messages.success(request, 'Menecer uğurla əlavə edildi.')
             return redirect('department_detail', pk=department.pk)
     else:
         form = ManagerForm(department=department)
@@ -523,7 +523,7 @@ def agent_delete(request, pk):
             agent.photo.delete()
         
         agent.delete()
-        messages.success(request, 'Agent başarıyla silindi.')
+        messages.success(request, 'Agent uğurla silindi.')
         
         # Önceki sayfaya yönlendir
         if referer_url:
@@ -536,7 +536,7 @@ def agent_delete(request, pk):
             agent.photo.delete()
         
         agent.delete()
-        messages.success(request, 'Agent başarıyla silindi.')
+        messages.success(request, 'Agent uğurla silindi.')
         
         # Önceki sayfaya yönlendir
         if referer_url:
@@ -568,6 +568,6 @@ def login_view(request):
             # Diğer durumlar için ana sayfaya yönlendir
             return redirect('agent_list')
         else:
-            messages.error(request, 'Kullanıcı adı veya şifre hatalı.')
+            messages.error(request, '*İstifadəçi adı və ya parol səhvdir. Yenidən cəhd edin.')
     
     return render(request, 'registration/login.html')
