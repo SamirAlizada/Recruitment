@@ -26,7 +26,7 @@
                 <div class="col-md-6">
                     <div class="card bg-light">
                         <div class="card-body">
-                            <h5 class="card-title mb-3">Toplam Değerler</h5>
+                            <h5 class="card-title mb-3">Ümumi Dəyərlər</h5>
                             <div class="row">
                                 <div class="col-12 mb-2">
                                     <strong>İcbari:</strong> {{ total_icbari_1 }} - {{ total_icbari_2 }} ₼
@@ -42,21 +42,29 @@
         </div>
     </div>
 
+    {% if user.is_superuser %}
+    <div class="mt-4 mb-2">
+        <a href="{% url 'department_detail' pk=department.id %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>{{ department.name }} Geri Qayıt
+        </a>
+    </div>
+    {% endif %}
+
     <div class="card shadow">
         <div class="card-header bg-dark text-white py-3">
-            <h5 class="mb-0">Agent Listesi</h5>
+            <h5 class="mb-0">Agent Siyahısı</h5>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="table table-hover mb-0">
                     <thead class="bg-light">
                         <tr>
-                            <th class="py-3" style="width: 80px;">FOTOĞRAF</th>
-                            <th class="py-3">AD</th>
-                            <th class="py-3">SOYAD</th>
-                            <th class="py-3" style="width: 250px;">İCBARİ</th>
-                            <th class="py-3" style="width: 250px;">KÖNÜLLÜ</th>
-                            <th class="py-3 text-end" style="width: 180px;">İŞLEMLER</th>
+                            <th class="py-3" style="width: 80px;">Foto</th>
+                            <th class="py-3">Ad</th>
+                            <th class="py-3">Soyad</th>
+                            <th class="py-3" style="width: 250px;">İcbari</th>
+                            <th class="py-3" style="width: 250px;">Könüllü</th>
+                            <th class="py-3 text-end" style="width: 180px;">Əməliyyatlar</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -123,7 +131,7 @@
                         {% empty %}
                         <tr>
                             <td colspan="6" class="text-center py-4 text-muted">
-                                Henüz agent bulunmamaktadır.
+                                Hələ ki, heç bir agent yoxdur.
                             </td>
                         </tr>
                         {% endfor %}
@@ -132,14 +140,6 @@
             </div>
         </div>
     </div>
-
-    {% if user.is_superuser %}
-    <div class="mt-4">
-        <a href="{% url 'department_detail' pk=department.id %}" class="btn btn-secondary">
-            <i class="fas fa-arrow-left me-2"></i>{{ department.name }} Departmanına Geri Dön
-        </a>
-    </div>
-    {% endif %}
 </div>
 
 <style>

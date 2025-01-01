@@ -7,7 +7,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="text-center">Giriş Yap</h3>
+                    <h3 class="text-center">Daxil Ol</h3>
                 </div>
                 <div class="card-body">
                     {% if messages %}
@@ -20,22 +20,22 @@
 
                     {% if form.errors %}
                         <div class="alert alert-danger">
-                            Kullanıcı adı veya şifre hatalı. Lütfen tekrar deneyin.
+                            İstifadəçi adı və ya parol səhvdir. Yenidən cəhd edin.
                         </div>
                     {% endif %}
 
                     <form method="post">
                         {% csrf_token %}
                         <div class="mb-3">
-                            <label for="username" class="form-label">Kullanıcı Adı</label>
+                            <label for="username" class="form-label">İstifadəçi Adı</label>
                             <input type="text" name="username" class="form-control" id="username" required>
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Şifre</label>
+                            <label for="password" class="form-label">Şifrə</label>
                             <input type="password" name="password" class="form-control" id="password" required>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Giriş Yap</button>
+                            <button type="submit" class="btn btn-primary">Daxil Ol</button>
                         </div>
                     </form>
                 </div>

@@ -3,9 +3,9 @@
 {% block content %}
 <div class="container mt-4">
     <div class="text-center mb-4">
-        <h1 class="display-4">Departmanlar</h1>
+        <h1 class="display-4">Şöbələr</h1>
         <a href="{% url 'add_department' %}" class="btn btn-primary btn-lg mt-2">
-            <i class="fas fa-plus"></i> Yeni Departman
+            <i class="fas fa-plus"></i> Yeni Şöbə
         </a>
     </div>
 
@@ -25,15 +25,15 @@
                 <div class="card-body text-center">
                     <h3 class="card-title mb-3">{{ department.name }}</h3>
                     <p class="card-text text-muted">
-                        <i class="fas fa-users"></i> {{ department.manager_set.count }} Yönetici
+                        <i class="fas fa-users"></i> {{ department.manager_set.count }} Menecer
                     </p>
                     <div class="d-grid gap-2">
                         <a href="{% url 'department_detail' department.pk %}" class="btn btn-primary">
-                            <i class="fas fa-info-circle"></i> Detaylar
+                            <i class="fas fa-info-circle"></i> Detallar
                         </a>
                         <div class="btn-group mt-2" role="group">
                             <a href="{% url 'edit_department' department.pk %}" class="btn btn-warning">
-                                <i class="fas fa-edit"></i> Düzenle
+                                <i class="fas fa-edit"></i> Düzəliş Et
                             </a>
                             <a href="#" class="btn btn-danger" 
                                 onclick="setupDepartmentDelete('{% url 'delete_department' department.pk %}')"
@@ -49,7 +49,7 @@
         {% empty %}
         <div class="col-12 text-center">
             <div class="alert alert-info">
-                Henüz departman bulunmamaktadır.
+                Hələ ki, şöbə yoxdur.
             </div>
         </div>
         {% endfor %}
@@ -61,15 +61,15 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Departman Sil</h5>
+                <h5 class="modal-title">Şöbəni Sil</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Bu departmanı silmek istediğinizden emin misiniz?</p>
-                <p class="text-danger"><small>Bu işlem geri alınamaz!</small></p>
+                <p>Bu şöbəi silmək istədiyinizə əminsiniz?</p>
+                <p class="text-danger"><small>Bu əməliyyat geri qaytarıla bilməz!</small></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
                 <form id="deleteDepartmentForm" method="POST" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Sil</button>

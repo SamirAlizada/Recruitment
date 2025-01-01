@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %}{{ agent.name }} {{ agent.surname }} - Personel Düzenle{% endblock %}
+{% block title %}{{ agent.name }} {{ agent.surname }} - Agentə Düzəliş Et{% endblock %}
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row justify-content-center">
@@ -8,7 +8,7 @@
                 <div class="card-header bg-gradient-primary text-white py-3">
                     <h2 class="h4 mb-0">
                         <i class="fas fa-user-edit me-2"></i>
-                        Personel Düzenle: {{ agent.name }} {{ agent.surname }}
+                        Düzəliş Et: {{ agent.name }} {{ agent.surname }}
                     </h2>
                 </div>
                 <div class="card-body p-4">
@@ -40,14 +40,14 @@
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="id_name" name="name" 
                                                value="{{ agent.name }}" required>
-                                        <label for="id_name">İsim <span class="text-danger">*</span></label>
+                                        <label for="id_name">Ad <span class="text-danger">*</span></label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <input type="text" class="form-control" id="id_surname" name="surname" 
                                                value="{{ agent.surname }}" required>
-                                        <label for="id_surname">Soyisim <span class="text-danger">*</span></label>
+                                        <label for="id_surname">Soyad <span class="text-danger">*</span></label>
                                     </div>
                                 </div>
                             </div>
@@ -83,13 +83,13 @@
                                             </option>
                                             {% endfor %}
                                         </select>
-                                        <label for="id_status">Durum <span class="text-danger">*</span></label>
+                                        <label for="id_status">Status <span class="text-danger">*</span></label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <select class="form-select" id="id_group" name="group" required>
-                                            <option value="">Grup Seçiniz</option>
+                                            <option value="">Qrup Seç</option>
                                             {% for group in groups %}
                                             <option value="{{ group.id }}" 
                                                     {% if agent.group.id == group.id %}selected{% endif %}>
@@ -97,7 +97,7 @@
                                             </option>
                                             {% endfor %}
                                         </select>
-                                        <label for="id_group">Grup <span class="text-danger">*</span></label>
+                                        <label for="id_group">Qrup <span class="text-danger">*</span></label>
                                     </div>
                                 </div>
                             </div>
@@ -107,7 +107,7 @@
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <select class="form-select" id="id_department" name="department">
-                                            <option value="">Departman Seçiniz</option>
+                                            <option value="">Şöbə Seç</option>
                                             {% for department in departments %}
                                                 <option value="{{ department.id }}" 
                                                         {% if agent.manager.department.id == department.id %}selected{% endif %}>
@@ -115,7 +115,7 @@
                                                 </option>
                                             {% endfor %}
                                         </select>
-                                        <label for="id_department">Departman <span class="text-danger">*</span></label>
+                                        <label for="id_department">Şöbə <span class="text-danger">*</span></label>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -126,20 +126,20 @@
                                                     {{ agent.manager.name }} {{ agent.manager.surname }}
                                                 </option>
                                             {% else %}
-                                                <option value="">Yönetici Seçiniz</option>
+                                                <option value="">Menecer Seç</option>
                                             {% endif %}
                                         </select>
-                                        <label for="id_manager">Yönetici <span class="text-danger">*</span></label>
+                                        <label for="id_manager">Menecer <span class="text-danger">*</span></label>
                                     </div>
                                 </div>
                             </div>
                         </div>
                             <div class="d-flex justify-content-end gap-2 mt-4">
                             <a href="{{ request.META.HTTP_REFERER|default:'/' }}" class="btn btn-light btn-lg px-4">
-                                <i class="fas fa-times me-2"></i>İptal
+                                <i class="fas fa-times me-2"></i>Ləğv et
                             </a>
                             <button type="submit" class="btn btn-primary btn-lg px-4">
-                                <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                                <i class="fas fa-save me-2"></i>Dəyişiklikləri Saxla
                             </button>
                         </div>
                     </form>

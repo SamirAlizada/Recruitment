@@ -21,24 +21,24 @@
             <ul class="navbar-nav me-auto">
                 {% if user.is_authenticated and user.is_superuser %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'agent_list' %}">Agents</a>
+                        <a class="nav-link" href="{% url 'agent_list' %}">Agentlər</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'group_list' %}">Groups</a>
+                        <a class="nav-link" href="{% url 'group_list' %}">Qruplar</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'department_list' %}">Departments</a>
+                        <a class="nav-link" href="{% url 'department_list' %}">Şöbələr</a>
                     </li>
                 {% endif %}
             </ul>
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        <a class="nav-link" href="{% url 'logout' %}">Çıxış</a>
                     </li>
                 {% else %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        <a class="nav-link" href="{% url 'login' %}">Daxil Ol</a>
                     </li>
                 {% endif %}
             </ul>

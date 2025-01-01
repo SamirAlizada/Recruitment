@@ -10,7 +10,7 @@
                 <div class="card-header bg-gradient-primary text-white py-3">
                     <h2 class="h4 mb-0">
                         <i class="fas fa-user-edit me-2"></i>
-                        Yönetici Düzenle: {{ manager.name }} {{ manager.surname }}
+                        Menecer Düzəliş Et: {{ manager.name }} {{ manager.surname }}
                     </h2>
                 </div>
                 <div class="card-body p-4">
@@ -42,7 +42,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="id_name" name="name" 
                                            value="{{ manager.name }}" required>
-                                    <label for="id_name">Adı <span class="text-danger">*</span></label>
+                                    <label for="id_name">Ad <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -51,7 +51,7 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="id_surname" name="surname" 
                                            value="{{ manager.surname }}" required>
-                                    <label for="id_surname">Soyadı <span class="text-danger">*</span></label>
+                                    <label for="id_surname">Soyad <span class="text-danger">*</span></label>
                                 </div>
                             </div>
 
@@ -60,17 +60,17 @@
                                 <div class="form-floating">
                                     <input type="text" class="form-control" id="id_department" name="department" 
                                            value="{{ manager.department }}" required>
-                                    <label for="id_department">Departman <span class="text-danger">*</span></label>
+                                    <label for="id_department">Şöbə <span class="text-danger">*</span></label>
                                 </div>
                             </div>
                         </div>
 
                         <div class="d-flex justify-content-end gap-2 mt-4">
                             <a href="{% url 'manager_list' %}" class="btn btn-light btn-lg px-4">
-                                <i class="fas fa-times me-2"></i>İptal
+                                <i class="fas fa-times me-2"></i>Ləğv Et
                             </a>
                             <button type="submit" class="btn btn-primary btn-lg px-4">
-                                <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+                                <i class="fas fa-save me-2"></i>Dəyişiklikləri Saxla
                             </button>
                         </div>
                     </form>

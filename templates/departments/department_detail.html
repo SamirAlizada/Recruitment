@@ -15,7 +15,7 @@
                         <i class="fas fa-trash"></i> <span class="d-none d-md-inline">Departmanı Sil</span>
                     </a> -->
                     <a href="{% url 'department_list' %}" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> <span class="d-none d-md-inline">Geri Dön</span>
+                        <i class="fas fa-arrow-left"></i> <span class="d-none d-md-inline">Geri</span>
                     </a>
                 </div>
             </div>
@@ -24,8 +24,8 @@
         <!-- Ana İçerik -->
         <div class="col-md-9 col-xl-10 p-3">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Departman Yöneticileri</h2>
-                <a href="{% url 'department_add_manager' dept_pk=department.pk %}" class="btn btn-primary"> <i class="fas fa-plus"></i> Yeni Yönetici Ekle</a>
+                <h2>Şöbənin Menecerləri</h2>
+                <a href="{% url 'department_add_manager' dept_pk=department.pk %}" class="btn btn-primary"> <i class="fas fa-plus"></i> Yeni Menecer Əlavə Edin</a>
             </div>
 
             {% if messages %}
@@ -65,10 +65,10 @@
                             <p class="text-muted mb-3">{{ manager.surname }}</p>
                             <div class="d-grid gap-2">
                                 <a href="{% url 'manager_detail' department.pk manager.pk %}" class="btn btn-info">
-                                    <i class="fas fa-eye"></i> Detaylar
+                                    <i class="fas fa-eye"></i> Detallar
                                 </a>
                                 <a href="{% url 'edit_manager' department.pk manager.pk %}" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i> Düzenle
+                                    <i class="fas fa-edit"></i> Düzəliş Et
                                 </a>
                                 <a href="#" class="btn btn-danger" 
                                     onclick="setupManagerDelete('{% url 'delete_manager' department.pk manager.pk %}')"
@@ -84,7 +84,7 @@
                 <div class="col-12">
                     <div class="alert alert-info text-center">
                         <i class="fas fa-info-circle fa-3x mb-3"></i>
-                        <h4>Bu departmanda henüz yönetici bulunmamaktadır.</h4>
+                        <h4>Bu şöbədə hələ ki, menecer yoxdur.</h4>
                     </div>
                 </div>
                 {% endfor %}
@@ -98,7 +98,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ department.name }} - Yeni Yönetici Ekle</h5>
+                <h5 class="modal-title">{{ department.name }} - Yeni Menecer Əlavə Edin</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
@@ -124,7 +124,7 @@
                     </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Kaydet
+                            <i class="fas fa-save"></i> Saxla
                         </button>
                     </div>
                 </form>
@@ -138,15 +138,15 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title">Yönetici Sil</h5>
+                <h5 class="modal-title">Meneceri Sil</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Bu yöneticiyi silmek istediğinizden emin misiniz?</p>
-                <p class="text-danger"><small>Bu işlem geri alınamaz!</small></p>
+                <p>Bu meneceri silmək istədiyinizə əminsiniz?</p>
+                <p class="text-danger"><small>Bu əməliyyat geri qaytarıla bilməz!</small></p>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
                 <form id="deleteManagerForm" method="POST" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Sil</button>

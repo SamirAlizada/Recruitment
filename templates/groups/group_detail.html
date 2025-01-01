@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load agent_filters %}
 
-{% block title %}{{ group.name }} - Grup Detayı{% endblock %}
+{% block title %}{{ group.name }} - Qrup Detalları{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
@@ -23,9 +23,9 @@
             <div class="card shadow-sm hover-shadow">
                 <div class="card-header bg-light py-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">Grup Agentleri</h4>
+                        <h4 class="mb-0">Qrup Agentləri</h4>
                         <a href="{% url 'group_list' %}" class="btn btn-primary">
-                            <i class="fas fa-arrow-left me-2"></i>Gruplara Geri Dön
+                            <i class="fas fa-arrow-left me-2"></i>Qruplara Geri Qayıt
                         </a>
                     </div>
                 </div>
@@ -87,14 +87,14 @@
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
                                                     <div class="modal-header">
-                                                        <h5 class="modal-title">Personeli Sil</h5>
+                                                        <h5 class="modal-title">Agenti Sil</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
                                                     <div class="modal-body">
-                                                        <p>{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
+                                                        <p>{{ agent.name }} {{ agent.surname }} adlı agenti silmək istədiyinizə əminsiniz?</p>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
                                                         <a href="{% url 'agent_delete' agent.id %}" class="btn btn-danger">
                                                             <i class="fas fa-trash me-2"></i>Sil
                                                         </a>
@@ -115,7 +115,7 @@
                                                 data-agent-id="{{ agent.id }}"
                                                 data-date="{{ date|date:'Y-m-d' }}"
                                                 style="width: auto; min-width: 80px; margin: 0 auto;">
-                                            <option value="">Seçiniz</option>
+                                            <option value="">Seç</option>
                                             <option value="i" {% if agent|get_schedule:date == 'i' %}selected{% endif %}>i/e</option>
                                             <option value="qb" {% if agent|get_schedule:date == 'qb' %}selected{% endif %}>qb</option>
                                         </select>

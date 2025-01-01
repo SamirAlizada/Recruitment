@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load agent_filters %}
 
-{% block title %}Personel Listesi{% endblock %}
+{% block title %}Agent Siyahısı {% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4">
     <div class="row">
         <div class="col-12">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h1 class="h2">Personel Listesi</h1>
+                <h1 class="h2">Agent Siyahısı</h1>
                 <a href="{% url 'add_agent' %}" class="btn btn-success">
-                    <i class="fas fa-plus"></i> Yeni Personel Ekle
+                    <i class="fas fa-plus"></i> Yeni Agent Əlavə Et
                 </a>
             </div>
 
@@ -29,15 +29,15 @@
                         <table class="table table-hover align-middle mb-0">
                             <thead class="table-light">
                                 <tr>
-                                    <th class="ps-3">Fotoğraf</th>
+                                    <th class="ps-3">Foto</th>
                                     <th>Ad</th>
                                     <th>Soyad</th>
                                     <th>FIN</th>
-                                    <th>Department</th>
-                                    <th>Manager</th>
-                                    <th>Kayıt Tarihi</th>
-                                    <th>Durum</th>
-                                    <th class="text-end pe-3">İşlemler</th>
+                                    <th>Şöbə</th>
+                                    <th>Menecer</th>
+                                    <th>Qeydiyyat tarixi</th>
+                                    <th>Status</th>
+                                    <th class="text-end pe-3">Əməliyyatlar</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -93,7 +93,7 @@
                                         <div class="btn-group">
                                             <a href="{% url 'edit_agent' agent.id %}" 
                                                class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i> Düzenle
+                                                <i class="fas fa-edit"></i> Düzəliş Et
                                             </a>
                                             <button type="button" 
                                                     class="btn btn-sm btn-outline-danger"
@@ -110,14 +110,14 @@
                                     <div class="modal-dialog">
                                         <div class="modal-content">
                                             <div class="modal-header">
-                                                <h5 class="modal-title">Personeli Sil</h5>
+                                                <h5 class="modal-title">Agenti Sil</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
                                             <div class="modal-body">
-                                                <p>{{ agent.name }} {{ agent.surname }} isimli personeli silmek istediğinizden emin misiniz?</p>
+                                                <p>{{ agent.name }} {{ agent.surname }} adlı agenti silmək istədiyinizə əminsiniz?</p>
                                             </div>
                                             <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv Et</button>
                                                 <a href="{% url 'agent_delete' agent.id %}" class="btn btn-danger">
                                                     <i class="fas fa-trash me-2"></i>Sil
                                                 </a>
@@ -130,7 +130,7 @@
                                     <td colspan="9" class="text-center py-4">
                                         <div class="text-muted">
                                             <i class="fas fa-info-circle me-2"></i>
-                                            Henüz personel bulunmamaktadır
+                                            Hələ ki, heç bir agent yoxdur.
                                         </div>
                                     </td>
                                 </tr>
@@ -145,7 +145,7 @@
                 <div class="card-body text-center py-5">
                     <div class="text-muted">
                         <i class="fas fa-info-circle me-2"></i>
-                        Henüz personel bulunmamaktadır
+                        Hələ ki, heç bir agent yoxdur.
                     </div>
                 </div>
             </div>
@@ -162,14 +162,14 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Personeli Sil</h5>
+                <h5 class="modal-title">Agenti Sil</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                Personeli silmek istediğinizden emin misiniz?
+                Agenti silmək istədiyinizə əminsiniz?
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv Et</button>
                 <form id="deleteForm" method="POST" style="display: inline;">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Sil</button>
