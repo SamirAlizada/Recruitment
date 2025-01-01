@@ -15,6 +15,14 @@ class AgentForm(forms.ModelForm):
     class Meta:
         model = Agent
         fields = ['photo', 'name', 'surname', 'fin', 'phone', 'status', 'group']
+        labels = {
+            'name': 'Ad',
+            'surname': 'Soyad',
+            'fin': 'Fin',
+            'phone': 'Telefon',
+            'status': 'Status',
+            'group': 'Qrup',
+        }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'surname': forms.TextInput(attrs={'class': 'form-control'}),
@@ -42,6 +50,10 @@ class ManagerForm(forms.ModelForm):
     class Meta:
         model = Manager
         fields = ['photo', 'name', 'surname']
+        labels = {
+            'name': 'Ad',
+            'surname': 'Soyad',
+        }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'surname': forms.TextInput(attrs={'class': 'form-control'}),
@@ -98,6 +110,9 @@ class DepartmentForm(forms.ModelForm):
     class Meta:
         model = Department
         fields = ['name']
+        labels = {
+            'name': 'Ad',
+        }
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'})
         }
