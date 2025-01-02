@@ -560,14 +560,14 @@ def login_view(request):
             try:
                 if hasattr(user, 'manager'):
                     return redirect('manager_detail', 
-                                 dept_pk=user.manager.department.id, 
-                                 manager_pk=user.manager.id)
+                                dept_pk=user.manager.department.id, 
+                                manager_pk=user.manager.id)
             except:
                 pass
             
             # Diğer durumlar için ana sayfaya yönlendir
             return redirect('agent_list')
         else:
-            messages.error(request, '*İstifadəçi adı və ya parol səhvdir. Yenidən cəhd edin.')
+            messages.error(request, 'İstifadəçi adı və ya şifrə səhvdir!')
     
     return render(request, 'registration/login.html')
