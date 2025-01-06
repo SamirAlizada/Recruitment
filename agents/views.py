@@ -101,6 +101,11 @@ def add_agent(request):
     if request.method == 'POST':
         form = AgentForm(request.POST, request.FILES)
         if form.is_valid():
+            # FİN değerini büyük harfe dönüştür
+            fin = form.cleaned_data['fin'].upper()
+            # FİN değerini form verilerine geri ekle
+            form.instance.fin = fin
+            
             form.save()
             messages.success(request, 'Agent uğurla əlavə edildi.')
             return redirect('agent_list')
@@ -173,6 +178,11 @@ def edit_agent(request, pk):
     if request.method == 'POST':
         form = AgentForm(request.POST, request.FILES, instance=agent)
         if form.is_valid():
+            # FİN değerini büyük harfe dönüştür
+            fin = form.cleaned_data['fin'].upper()
+            # FİN değerini form verilerine geri ekle
+            form.instance.fin = fin
+            
             agent = form.save(commit=False)
             
             if agent.status in ['Passed to Training', 'Invited to Work', 'Failed to Work']:
