@@ -14,7 +14,7 @@
                     </h2>
                 </div>
                 <div class="card-body p-4">
-                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="addAgentForm">
                         {% csrf_token %}
                         
                         <div class="row g-4">
@@ -84,7 +84,7 @@
                                 <div class="col-md-6">
                                     <div class="form-floating">
                                         <select class="form-select" id="id_status" name="status" required>
-                                            <option value="Passed to Interview" selected>Passed to Interview</option>
+                                            <option value="Müsahibədən keçdi" selected>Müsahibədən keçdi</option>
                                         </select>
                                         <label for="id_status">Status <span class="text-danger">*</span></label>
                                     </div>
@@ -119,13 +119,34 @@
     </div>
 </div>
 
+<!-- Error Modal -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="errorModalLabel">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    Xəta
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p id="errorMessage" class="mb-0"></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <style>
 .bg-gradient-primary {
     background: linear-gradient(45deg, #4e73df 0%, #224abe 100%);
 }
 
 .form-floating {
-    width: 100%; /* Tüm form alanlarının genişliğini ayarlar */
+    width: 100%;
 }
 
 .form-floating > label {
@@ -147,7 +168,6 @@
     border-color: #d1d3e2;
 }
 
-/* Input mask placeholder stilini düzelt */
 .form-floating input:not(.filled)::placeholder {
     color: transparent;
 }
@@ -156,7 +176,33 @@
 .form-floating input:not(:placeholder-shown) + label + small {
     display: none;
 }
+
+/* Loading spinner styles */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
 </style>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.inputmask/5.0.6/jquery.inputmask.min.js"></script>
 <script>
@@ -175,26 +221,62 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Form doğrulama
-    const form = document.querySelector('form');
+    // Form submission handling
+    const form = document.getElementById('addAgentForm');
+    const loadingOverlay = document.querySelector('.loading-overlay');
+    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+
     form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
         if (!form.checkValidity()) {
-            event.preventDefault();
             event.stopPropagation();
+            form.classList.add('was-validated');
+            return;
         }
-        form.classList.add('was-validated');
+
+        // Show loading overlay
+        loadingOverlay.style.display = 'flex';
+
+        // Create FormData object
+        const formData = new FormData(form);
+
+        // Submit form via AJAX
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            loadingOverlay.style.display = 'none';
+            
+            if (data.status === 'error') {
+                // Show error modal
+                document.getElementById('errorMessage').textContent = data.message || 'Bu FIN nömrəsi artıq mövcuddur.';
+                errorModal.show();
+            } else if (data.status === 'success') {
+                // Redirect to success page
+                window.location.href = data.redirect_url || '{% url "agent_list" %}';
+            }
+        })
+        .catch(error => {
+            loadingOverlay.style.display = 'none';
+            document.getElementById('errorMessage').textContent = 'Xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.';
+            errorModal.show();
+        });
     });
 
     function maskPhoneNumber(input) {
         input.addEventListener('input', function (e) {
-            let value = e.target.value.replace(/\D/g, '');  // Sadece rakamları al
+            let value = e.target.value.replace(/\D/g, '');
 
-            // 0 ile başlamasını sağla
             if (!value.startsWith('0')) {
                 value = '0' + value;
             }
 
-            // Formatı uygula
             let x = value.match(/(\d{0,3})(\d{0,3})(\d{0,2})(\d{0,2})/);
             e.target.value = (x[1] ? `(${x[1]})` : '') +
                 (x[2] ? ` ${x[2]}` : '') +
