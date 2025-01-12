@@ -28,36 +28,48 @@ class Manager(models.Model):
     def __str__(self):
         return self.name
 
+class DepartmentHead(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    photo = models.ImageField(upload_to='department_head_photos/', blank=True, null=True)
+    name = models.CharField(max_length=50)
+    surname = models.CharField(max_length=50)
+    department = models.OneToOneField(Department, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.name} {self.surname} - {self.department.name}"
+
 def get_default_group():
     # İlk mövcud qrupun ID-sini qaytarır
     return Group.objects.first().id if Group.objects.exists() else None
 
 class Agent(models.Model):
-    photo = models.ImageField(upload_to='agent_photos/', blank=True, null=True)
+    STATUS_CHOICES = [
+        ('Müsahibədən keçdi', 'Müsahibədən keçdi'),
+        ('Təlimə dəvət oldu', 'Təlimə dəvət oldu'),
+        ("Təlimə gəlmədi", "Təlimə gəlmədi"),
+        ('Təlimi keçə bilmədi', 'Təlimi keçə bilmədi'),
+        ('Təlimdən keçdi', 'Təlimdən keçdi'),
+        ("İşə gəlmədi", "İşə gəlmədi"),
+        ('İşə dəvət olundu', 'İşə dəvət olundu'),
+        ('İşdən çıxdı', 'İşdən çıxdı'),
+    ]
+    
     name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
-    fin = models.CharField(max_length=7)
-    phone = models.CharField(max_length=15, null=True, blank=True)
+    fin = models.CharField(max_length=7, unique=True)
+    phone = models.CharField(max_length=20)
+    photo = models.ImageField(upload_to='agent_photos/', null=True, blank=True)
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Müsahibədən keçdi')
     created_at = models.DateTimeField(auto_now_add=True)
+    group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True, blank=True)
+    manager = models.ForeignKey('Manager', on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey('Department', on_delete=models.SET_NULL, null=True, blank=True)
     icbari_1 = models.IntegerField(null=True, blank=True)
-    icbari_2 = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    icbari_2 = models.FloatField(null=True, blank=True)
     konullu_1 = models.IntegerField(null=True, blank=True)
-    konullu_2 = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    status = models.CharField(
-        max_length=20,
-        choices=[
-            ('Passed to Interview', 'Passed to Interview'),
-            ('Invited to Training', 'Invited to Training'),
-            ('Failed to Training', 'Failed to Training'),
-            ('Passed to Training', 'Passed to Training'),
-            ('Invited to Work', 'Invited to Work'),
-            ('Failed to Work', 'Failed to Work'),
-            ('Passed to Work', 'Passed to Work'),
-        ],
-        default="Passed to Interview"
-    )
-    group = models.ForeignKey(Group, on_delete=models.CASCADE, blank=True, null=True)
-    manager = models.ForeignKey(Manager, on_delete=models.SET_NULL, blank=True, null=True)
+    konullu_2 = models.FloatField(null=True, blank=True)
+    training_period = models.JSONField(null=True, blank=True, help_text='Training period start and end dates in format {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}')
+    department_transfer_date = models.DateField(null=True, blank=True, help_text='Date when agent was transferred to department')
 
     def __str__(self):
         return f"{self.name} {self.surname} - {self.status}"
