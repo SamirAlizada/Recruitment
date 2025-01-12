@@ -64,8 +64,8 @@
                                     <td>{{ agent.surname }}</td>
                                     <td>{{ agent.fin }}</td>
                                     <td>
-                                        {% if agent.manager.department %}
-                                            {{ agent.manager.department.name }}
+                                        {% if agent.department %}
+                                            {{ agent.department.name }}
                                         {% else %}
                                             <span class="text-muted">-----</span>
                                         {% endif %}
@@ -79,11 +79,11 @@
                                     </td>
                                     <td>{{ agent.created_at|date:"d/m/Y" }}</td>
                                     <td>
-                                        {% if agent.status in 'Passed to Training,Passed to Work' %}
+                                        {% if agent.status in 'Təlimdən keçdi,Passed to Work' %}
                                             <span class="badge bg-success">{{ agent.get_status_display }}</span>
-                                        {% elif agent.status in 'Passed to Interview,Invited to Training,Invited to Work' %}
+                                        {% elif agent.status in 'Müsahibədən keçdi,Təlimə dəvət olundu,İşə dəvət olundu' %}
                                             <span class="badge bg-warning">{{ agent.get_status_display }}</span>
-                                        {% elif agent.status in 'Failed to Training,Failed to Work' %}
+                                        {% elif agent.status in 'Təlimi keçə bilmədi,İşdən çıxdı' %}
                                             <span class="badge bg-danger">{{ agent.get_status_display }}</span>
                                         {% else %}
                                             <span class="badge bg-secondary">{{ agent.get_status_display }}</span>
@@ -109,7 +109,7 @@
                                 <div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1">
                                     <div class="modal-dialog">
                                         <div class="modal-content">
-                                            <div class="modal-header">
+                                            <div class="modal-header bg-danger text-white">
                                                 <h5 class="modal-title">Agenti Sil</h5>
                                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                             </div>
@@ -157,34 +157,4 @@
 <!-- Font Awesome CDN -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Agenti Sil</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                Agenti silmək istədiyinizə əminsiniz?
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv Et</button>
-                <form id="deleteForm" method="POST" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger">Sil</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-function confirmDelete(agentId) {
-    const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
-    const form = document.getElementById('deleteForm');
-    form.action = `/agents/${agentId}/delete/`;
-    modal.show();
-}
-</script>
 {% endblock content %}
