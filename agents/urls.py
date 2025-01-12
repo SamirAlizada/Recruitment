@@ -4,6 +4,10 @@ from . import views
 
 urlpatterns = [
     path('', views.agent_list, name='agent_list'),
+    path('department-head/', views.department_head_dashboard, name='department_head_dashboard'),
+    path('departments/<int:dept_pk>/department-head/add/', views.add_department_head, name='add_department_head'),
+    path('departments/<int:dept_pk>/department-head/<int:head_pk>/edit/', views.edit_department_head, name='edit_department_head'),
+    path('departments/<int:dept_pk>/department-head/<int:head_pk>/delete/', views.delete_department_head, name='delete_department_head'),
     path('add/', views.add_agent, name='add_agent'),
     path('update/<int:pk>/', views.update_agent_status, name='update_agent_status'),
     path('edit/<int:pk>/', views.edit_agent, name='edit_agent'),
@@ -11,6 +15,9 @@ urlpatterns = [
     path('agents/<int:agent_id>/delete/', views.delete_agent, name='delete_agent'),
     
     path('groups/', views.group_list, name='group_list'),
+    path('groups/add/', views.add_group, name='add_group'),
+    path('groups/<int:pk>/edit/', views.edit_group, name='edit_group'),
+    path('groups/<int:pk>/delete/', views.delete_group, name='delete_group'),
     path('groups/<int:group_id>/', views.group_detail, name='group_detail'),
 
     path('managers/', views.manager_list, name='manager_list'),
@@ -31,4 +38,13 @@ urlpatterns = [
     path('api/departments/<int:dept_id>/managers/', views.get_department_managers, name='get_department_managers'),
     path('departments/<int:dept_pk>/add-manager/', views.add_manager, name='department_add_manager'),
     path('update-agent-values/', views.update_agent_values, name='update_agent_values'),
+    path('delete-department-head/<int:dept_pk>/<int:head_pk>/', views.delete_department_head, name='delete_department_head'),
+    path('transfer-to-department/', views.transfer_to_department, name='transfer_to_department'),
+    path('assign-manager/', views.assign_manager, name='assign_manager'),
+    path('agent/<int:agent_id>/edit/', views.edit_agent, name='edit_agent'),
+    path('agent/<int:agent_id>/delete/', views.delete_agent, name='delete_agent'),
+    path('hesabat/', views.hesabat_view, name='hesabat'),
+    path('mark-agent-didnt-come/', views.mark_agent_didnt_come, name='mark_agent_didnt_come'),
+    # path('hesabat/get_agents_by_type/<str:agent_type>/', views.get_agents_by_type, name='get_agents_by_type'),
+    # path('hesabat/get_agents_by_type/<str:agent_type>/', views.get_agents_by_type, name='get_agents_by_type'),
 ]
