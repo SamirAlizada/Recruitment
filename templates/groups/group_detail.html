@@ -22,11 +22,21 @@
             <!-- Agent Tablosu -->
             <div class="card shadow-sm hover-shadow">
                 <div class="card-header bg-light py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h4 class="mb-0">Qrup Agentləri</h4>
-                        <a href="{% url 'group_list' %}" class="btn btn-primary">
+                    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                        <a href="{% url 'group_list' %}" class="btn btn-primary order-1">
                             <i class="fas fa-arrow-left me-2"></i>Qruplara Geri Qayıt
                         </a>
+                        <h4 class="mb-0 order-2 flex-grow-1 text-center">Qrup Agentləri</h4>
+                        <div class="d-flex gap-2 order-3">
+                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addAgentModal">
+                                <i class="fas fa-plus me-2"></i>Əlavə Et
+                            </button>
+                            {% if agents.exists and current_date == week_end %}
+                            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#transferToDepartmentModal">
+                                <i class="fas fa-exchange-alt me-2"></i>Şöbəyə Yönəlt
+                            </button>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -44,7 +54,7 @@
                             </thead>
                             <tbody>
                                 {% for agent in agents %}
-                                <tr class="{% if agent.status == 'Failed to Training' %}table-danger{% endif %}">
+                                <tr class="{% if agent.status == 'Təlimi keçə bilmədi' %}table-danger{% endif %}">
                                     <td>
                                         <div class="d-flex align-items-center gap-3 p-2">
                                             <div class="position-relative">
@@ -86,7 +96,7 @@
                                         <div class="modal fade" id="deleteModal{{ agent.id }}" tabindex="-1">
                                             <div class="modal-dialog">
                                                 <div class="modal-content">
-                                                    <div class="modal-header">
+                                                    <div class="modal-header bg-danger text-white">
                                                         <h5 class="modal-title">Agenti Sil</h5>
                                                         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                                     </div>
@@ -104,14 +114,14 @@
                                         </div>
                                     </td>
                                     {% for date in week_dates %}
-                                    <td class="text-center {% if date < current_date and agent.status != 'Failed to Training' %}past-date-column{% endif %}">
+                                    <td class="text-center {% if date < current_date and agent.status != 'Təlimi keçə bilmədi' %}past-date-column{% endif %}">
                                         <select class="form-select form-select-sm border-0 schedule-select 
-                                                {% if agent.status == 'Failed to Training' %}
+                                                {% if agent.status == 'Təlimi keçə bilmədi' %}
                                                     bg-danger bg-opacity-10
                                                 {% elif date < current_date %}
                                                     past-date
                                                 {% endif %}" 
-                                                {% if date < current_date or agent.status == 'Failed to Training' %}disabled{% endif %}
+                                                {% if date < current_date or agent.status == 'Təlimi keçə bilmədi' %}disabled{% endif %}
                                                 data-agent-id="{{ agent.id }}"
                                                 data-date="{{ date|date:'Y-m-d' }}"
                                                 style="width: auto; min-width: 80px; margin: 0 auto;">
@@ -127,6 +137,134 @@
                         </table>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Agent Modal -->
+<div class="modal fade" id="addAgentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Agent Əlavə Et</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="d-flex justify-content-end mb-3">
+                    <button type="button" class="btn btn-success" id="bulkAddAgentsBtn" disabled>
+                        <i class="fas fa-plus me-2"></i>Seçilənləri Əlavə Et (<span id="selectedCount">0</span>)
+                    </button>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllAgents">
+                                    </div>
+                                </th>
+                                <th>Agent</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in available_agents %}
+                            <tr>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input agent-checkbox" type="checkbox" value="{{ agent.id }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if agent.photo %}
+                                        <img src="{{ agent.photo.url }}" 
+                                             alt="{{ agent.name }}" 
+                                             class="rounded-circle"
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center"
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user text-secondary"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ agent.name }} {{ agent.surname }}</h6>
+                                            {% if agent.department %}
+                                            <small class="text-muted">{{ agent.department.name }}</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ agent.status }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center py-4">
+                                    <div class="text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>Əlavə ediləcək agent tapılmadı
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transfer to Department Modal -->
+<div class="modal fade" id="transferToDepartmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Şöbə Seçin</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="list-group">
+                    {% for dept in departments %}
+                    <button type="button" 
+                            class="list-group-item list-group-item-action d-flex justify-content-between align-items-center transfer-dept-btn"
+                            data-dept-id="{{ dept.id }}"
+                            data-dept-name="{{ dept.name }}"
+                            data-group-id="{{ group.id }}">
+                        {{ dept.name }}
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transfer Result Modal -->
+<div class="modal fade" id="transferResultModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">Transfer Nəticəsi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+                    <div id="transferResultMessage"></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="goToDepartmentBtn">Şöbəyə Keç</button>
             </div>
         </div>
     </div>
@@ -219,9 +357,82 @@
     background-color: #e9ecef !important;
 }
 
-/* Failed to Training durumunda geçmiş tarih stilini ezme */
+/* Təlimi keçə bilmədi durumunda geçmiş tarih stilini ezme */
 .table-danger td.past-date-column {
     background-color: #ffebee !important;
+}
+
+/* Transfer Result Modal styles */
+#transferResultModal .modal-body {
+    padding: 2rem;
+}
+
+#transferResultModal .fa-check-circle {
+    color: #198754;
+}
+
+#transferResultMessage {
+    font-size: 1.1rem;
+    line-height: 1.6;
+}
+
+#transferResultMessage .badge {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0 0.3rem;
+}
+
+@media (max-width: 768px) {
+    .card-header .d-flex {
+        justify-content: center !important;
+    }
+    
+    .card-header .d-flex > * {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .card-header h4 {
+        order: 1;
+        margin-bottom: 1rem !important;
+    }
+    
+    .card-header .btn-primary {
+        order: 3;
+    }
+    
+    .card-header .d-flex.gap-2 {
+        order: 2;
+        margin-bottom: 1rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-header .d-flex.gap-2 {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .card-header .d-flex.gap-2 .btn {
+        width: 100%;
+    }
+    
+    .card-header {
+        padding: 1rem !important;
+    }
+}
+
+/* Improve button spacing */
+.card-header .d-flex.gap-3 {
+    gap: 1rem !important;
+}
+
+/* Ensure buttons have consistent width */
+.card-header .btn {
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 </style>
 
@@ -256,6 +467,69 @@
             });
         });
     });
+
+    // Bulk add agents functionality
+    const selectAllCheckbox = document.getElementById('selectAllAgents');
+    const agentCheckboxes = document.querySelectorAll('.agent-checkbox');
+    const bulkAddButton = document.getElementById('bulkAddAgentsBtn');
+    const selectedCountSpan = document.getElementById('selectedCount');
+
+    // Update selected count and button state
+    function updateSelectedCount() {
+        const selectedCount = document.querySelectorAll('.agent-checkbox:checked').length;
+        selectedCountSpan.textContent = selectedCount;
+        bulkAddButton.disabled = selectedCount === 0;
+    }
+
+    // Select all checkbox functionality
+    selectAllCheckbox?.addEventListener('change', function() {
+        agentCheckboxes.forEach(checkbox => {
+            checkbox.checked = this.checked;
+        });
+        updateSelectedCount();
+    });
+
+    // Individual checkbox functionality
+    agentCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            updateSelectedCount();
+            // Update select all checkbox state
+            selectAllCheckbox.checked = [...agentCheckboxes].every(cb => cb.checked);
+            selectAllCheckbox.indeterminate = [...agentCheckboxes].some(cb => cb.checked) && !selectAllCheckbox.checked;
+        });
+    });
+
+    // Bulk add button functionality
+    bulkAddButton?.addEventListener('click', function() {
+        const selectedAgentIds = [...document.querySelectorAll('.agent-checkbox:checked')].map(cb => cb.value);
+        
+        fetch('', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: `bulk_add=true&agent_ids=${JSON.stringify(selectedAgentIds)}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.location.reload();
+            } else {
+                alert(data.message || 'Xəta baş verdi!');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Sistemdə xəta baş verdi. Zəhmət olmasa yenidən cəhd edin.');
+        });
+    });
+
+    // Remove old add-agent-btn event listeners since we're using bulk add now
+    document.querySelectorAll('.add-agent-btn').forEach(button => {
+        button.replaceWith(button.cloneNode(true));
+    });
 });
 
 // CSRF token için yardımcı fonksiyon
@@ -273,5 +547,68 @@ function getCookie(name) {
     }
     return cookieValue;
 }
+
+// Department transfer functionality
+document.querySelectorAll('.transfer-dept-btn').forEach(button => {
+    button.addEventListener('click', function() {
+        const deptId = this.dataset.deptId;
+        const groupId = this.dataset.groupId;
+        const deptName = this.dataset.deptName;
+        
+        console.log('Transferring to department:', deptId, 'from group:', groupId);  // Debug için
+        
+        const formData = new FormData();
+        formData.append('department_id', deptId);
+        formData.append('group_id', groupId);
+        
+        fetch("{% url 'transfer_to_department' %}", {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: formData
+        })
+        .then(response => {
+            console.log('Response status:', response.status);  // Debug için
+            return response.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);  // Debug için
+            if (data.status === 'success') {
+                // Transfer sonuç modalını hazırla
+                const transferResultMessage = document.getElementById('transferResultMessage');
+                const goToDepartmentBtn = document.getElementById('goToDepartmentBtn');
+                
+                // HTML ile mesajı formatla
+                let messageHTML = `<p class="mb-3">${data.message}</p>`;
+                
+                // Departman bilgisini ekle
+                messageHTML += `<p class="mb-0">Seçilən şöbə: <span class="badge bg-primary">${deptName}</span></p>`;
+                
+                transferResultMessage.innerHTML = messageHTML;
+                
+                // Yönlendirme butonunu ayarla
+                goToDepartmentBtn.onclick = function() {
+                    window.location.href = data.redirect_url;
+                };
+                
+                // Önce transfer modal'ını kapat
+                let transferModal = bootstrap.Modal.getInstance(document.getElementById('transferToDepartmentModal'));
+                transferModal.hide();
+                
+                // Sonra sonuç modal'ını göster
+                let resultModal = new bootstrap.Modal(document.getElementById('transferResultModal'));
+                resultModal.show();
+            } else {
+                alert('Xəta baş verdi: ' + (data.message || 'Bilinməyən xəta'));
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Xəta baş verdi!');
+        });
+    });
+});
 </script>
 {% endblock %}
