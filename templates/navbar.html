@@ -7,6 +7,8 @@
             {% else %}
                 {% if user.manager %}
                     <a class="navbar-brand" href="{% url 'manager_detail' dept_pk=user.manager.department.id manager_pk=user.manager.id %}">Recruitment</a>
+                {% elif user.departmenthead %}
+                    <a class="navbar-brand" href="{% url 'department_detail' pk=user.departmenthead.department.id %}">Recruitment</a>
                 {% endif %}
             {% endif %}
         {% else %}
@@ -28,6 +30,9 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'department_list' %}">Şöbələr</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'hesabat' %}">Hesabat</a>
                     </li>
                 {% endif %}
             </ul>
