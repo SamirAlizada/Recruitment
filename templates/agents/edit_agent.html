@@ -110,7 +110,7 @@
                                             <option value="">Şöbə Seç</option>
                                             {% for department in departments %}
                                                 <option value="{{ department.id }}" 
-                                                        {% if agent.manager.department.id == department.id %}selected{% endif %}>
+                                                        {% if agent.department.id == department.id %}selected{% endif %}>
                                                     {{ department.name }}
                                                 </option>
                                             {% endfor %}
@@ -201,34 +201,52 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Status değiştiğinde
     statusSelect.addEventListener('change', function() {
-        const showManagerSection = ['Passed to Training', 'Invited to Work', 'Failed to Work', 'Passed to Work'].includes(this.value);
+        const showManagerSection = ['Təlimdən keçdi', 'İşə dəvət olundu', 'İşdən çıxdı', 'İşə gəlmədi'].includes(this.value);
         
         departmentManagerSection.style.display = showManagerSection ? 'flex' : 'none';
         
         // Grup seçimini kontrol et
         const groupSelect = document.getElementById('id_group');
-        if (['Invited to Work', 'Failed to Work', 'Passed to Work'].includes(this.value)) {
+        if (['İşə dəvət olundu', 'İşdən çıxdı', 'İşə gəlmədi'].includes(this.value)) {
             groupSelect.value = '';
             groupSelect.disabled = true;
         } else {
             groupSelect.disabled = false;
         }
         
-        if (!showManagerSection) {
-            departmentSelect.value = '';
-            managerSelect.innerHTML = '<option value="">Yönetici Seçiniz</option>';
-        } else if (currentManagerId) {
-            const currentManagerOption = managerSelect.querySelector(`option[value="${currentManagerId}"]`);
-            if (!currentManagerOption) {
-                loadManagers(departmentSelect.value, currentManagerId);
+        // İşə gəlmədi durumunda sadece departmanı göster, meneceri gizle
+        if (this.value === 'İşə gəlmədi') {
+            managerSelect.closest('.col-md-6').style.display = 'none';
+            departmentSelect.closest('.col-md-6').classList.remove('col-md-6');
+            departmentSelect.closest('.col-12').classList.add('col-12');
+        } else {
+            managerSelect.closest('.col-md-6').style.display = '';
+            departmentSelect.closest('.col-12').classList.remove('col-12');
+            departmentSelect.closest('.col-12').classList.add('col-md-6');
+            
+            if (!showManagerSection) {
+                departmentSelect.value = '';
+                managerSelect.innerHTML = '<option value="">Menecer Seç</option>';
+            } else if (currentManagerId) {
+                const currentManagerOption = managerSelect.querySelector(`option[value="${currentManagerId}"]`);
+                if (!currentManagerOption) {
+                    loadManagers(departmentSelect.value, currentManagerId);
+                }
             }
         }
     });
 
     // Sayfa yüklendiğinde mevcut durumu kontrol et
     const currentStatus = statusSelect.value;
-    const showManagerSection = ['Passed to Training', 'Invited to Work', 'Failed to Work', 'Passed to Work'].includes(currentStatus);
+    const showManagerSection = ['Təlimdən keçdi', 'İşə dəvət olundu', 'İşdən çıxdı', 'İşə gəlmədi'].includes(currentStatus);
     departmentManagerSection.style.display = showManagerSection ? 'flex' : 'none';
+    
+    // İşə gəlmədi durumu için başlangıç kontrolü
+    if (currentStatus === 'İşə gəlmədi') {
+        managerSelect.closest('.col-md-6').style.display = 'none';
+        departmentSelect.closest('.col-md-6').classList.remove('col-md-6');
+        departmentSelect.closest('.col-12').classList.add('col-12');
+    }
 
     // Department değiştiğinde
     departmentSelect.addEventListener('change', function() {
@@ -246,7 +264,7 @@ document.addEventListener('DOMContentLoaded', function() {
         fetch(url)
             .then(response => response.json())
             .then(data => {
-                managerSelect.innerHTML = '<option value="">Yönetici Seçiniz</option>';
+                managerSelect.innerHTML = '<option value="">Menecer Seç</option>';
                 
                 if (Array.isArray(data) && data.length > 0) {
                     data.forEach(manager => {
