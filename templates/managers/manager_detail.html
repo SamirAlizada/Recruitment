@@ -42,7 +42,7 @@
         </div>
     </div>
 
-    {% if user.is_superuser %}
+    {% if user.is_superuser or user.departmenthead.department == department %}
     <div class="mt-4 mb-2">
         <a href="{% url 'department_detail' pk=department.id %}" class="btn btn-secondary">
             <i class="fas fa-arrow-left me-2"></i>{{ department.name }} Geri Qayıt
@@ -69,7 +69,7 @@
                     </thead>
                     <tbody>
                         {% for agent in agents %}
-                        <tr {% if agent.status == "Failed to Work" %}class="table-danger"{% endif %}>
+                        <tr {% if agent.status == "İşdən çıxdı" %}class="table-danger"{% endif %}>
                             <td class="py-3">
                                 <div class="photo-zoom">
                                     {% if agent.photo %}
@@ -88,15 +88,19 @@
                                     <div class="col-12">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text fixed-width">Say:</span>
-                                            <input type="number" class="form-control" value="{{ agent.icbari_1|default:'' }}" 
-                                                   data-agent-id="{{ agent.id }}" data-field="icbari_1" {% if agent.status == "Failed to Work" %}disabled{% endif %}>
+                                            <input type="number" class="form-control disabled-input" 
+                                                   value="{{ agent.icbari_1|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="icbari_1" 
+                                                   {% if agent.status == "İşdən çıxdı" %}disabled{% endif %}>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text fixed-width">Ümumi:</span>
-                                            <input type="number" step="0.01" class="form-control" value="{{ agent.icbari_2|default:'' }}" 
-                                                   data-agent-id="{{ agent.id }}" data-field="icbari_2" {% if agent.status == "Failed to Work" %}disabled{% endif %}>
+                                            <input type="number" step="0.01" class="form-control disabled-input" 
+                                                   value="{{ agent.icbari_2|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="icbari_2" 
+                                                   {% if agent.status == "İşdən çıxdı" %}disabled{% endif %}>
                                         </div>
                                     </div>
                                 </div>
@@ -106,15 +110,19 @@
                                     <div class="col-12">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text fixed-width">Say:</span>
-                                            <input type="number" class="form-control" value="{{ agent.konullu_1|default:'' }}" 
-                                                   data-agent-id="{{ agent.id }}" data-field="konullu_1" {% if agent.status == "Failed to Work" %}disabled{% endif %}>
+                                            <input type="number" class="form-control disabled-input" 
+                                                   value="{{ agent.konullu_1|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="konullu_1" 
+                                                   {% if agent.status == "İşdən çıxdı" %}disabled{% endif %}>
                                         </div>
                                     </div>
                                     <div class="col-12">
                                         <div class="input-group input-group-sm">
                                             <span class="input-group-text fixed-width">Ümumi:</span>
-                                            <input type="number" step="0.01" class="form-control" value="{{ agent.konullu_2|default:'' }}" 
-                                                   data-agent-id="{{ agent.id }}" data-field="konullu_2" {% if agent.status == "Failed to Work" %}disabled{% endif %}>
+                                            <input type="number" step="0.01" class="form-control disabled-input" 
+                                                   value="{{ agent.konullu_2|default:'' }}" 
+                                                   data-agent-id="{{ agent.id }}" data-field="konullu_2" 
+                                                   {% if agent.status == "İşdən çıxdı" %}disabled{% endif %}>
                                         </div>
                                     </div>
                                 </div>
@@ -137,6 +145,25 @@
                         {% endfor %}
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteAgentModal" tabindex="-1" aria-labelledby="deleteAgentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteAgentModalLabel">Agent Silmə Təsdiqi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Bu agenti silmək istədiyinizə əminsiniz?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteAgent">Sil</button>
             </div>
         </div>
     </div>
@@ -168,13 +195,19 @@
 }
 
 .table > :not(caption) > * > * {
-    padding: 1rem 1rem;
+    padding: 0.75rem;
     vertical-align: middle;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .input-group-text {
     background-color: #f8f9fa;
     border-color: #dee2e6;
+    white-space: nowrap;
 }
 
 .fixed-width {
@@ -208,10 +241,28 @@
     z-index: 1000;
 }
 
-/* Mobil görünüm için düzenlemeler */
+/* Responsive düzenlemeler */
+@media (max-width: 1200px) {
+    .card-body {
+        padding: 0.75rem;
+    }
+    
+    .input-group {
+        width: 100%;
+    }
+    
+    .table td {
+        min-width: 100px;
+    }
+    
+    td:nth-child(4), td:nth-child(5) {  /* İcbari ve Könüllü sütunları */
+        min-width: 200px;
+    }
+}
+
 @media (max-width: 768px) {
     .table td {
-        padding: 0.75rem !important;
+        padding: 0.5rem !important;
     }
     
     .input-group {
@@ -220,6 +271,7 @@
     
     .input-group-text {
         font-size: 0.875rem;
+        padding: 0.25rem 0.5rem;
     }
     
     .form-control {
@@ -229,6 +281,44 @@
     .photo-zoom:hover img, .photo-zoom:hover div {
         transform: scale(2);
     }
+    
+    .fixed-width {
+        min-width: 60px;
+    }
+    
+    .btn-sm {
+        padding: 0.2rem 0.4rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .card-header {
+        padding: 0.75rem;
+    }
+}
+
+/* Disabled input styles */
+.disabled-input:disabled {
+    cursor: not-allowed;
+    position: relative;
+    background-color: #e9ecef;
+}
+
+.disabled-input:disabled:hover {
+    cursor: not-allowed;
+}
+
+.disabled-input:disabled:hover::after {
+    content: '\f05e';
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #dc3545;
+    font-size: 12px;
+    opacity: 0.7;
 }
 
 .is-valid {
@@ -295,35 +385,81 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
+    let selectedAgentId = null;
+    const deleteModal = new bootstrap.Modal(document.getElementById('deleteAgentModal'));
+
     // Delete agent işlemi
     document.querySelectorAll('.delete-agent').forEach(button => {
         button.addEventListener('click', function() {
-            if (confirm('Bu agenti silmək istədiyinizə əminsiniz?')) {
-                const agentId = this.dataset.agentId;
-                
-                fetch(`/delete-agent/${agentId}/?source=manager_detail`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRFToken': getCookie('csrftoken'),
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === 'success') {
-                        // Agent başarıyla silindi, sayfayı yenile
-                        location.reload();
-                    } else {
-                        alert('Agent silinərkən xəta baş verdi.');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Agent silinərkən xəta baş verdi.');
-                });
-            }
+            selectedAgentId = this.dataset.agentId;
+            deleteModal.show();
         });
     });
+
+    // Modal confirm button click handler
+    document.getElementById('confirmDeleteAgent').addEventListener('click', function() {
+        if (selectedAgentId) {
+            fetch(`/agents/${selectedAgentId}/delete/?source=manager_detail`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                deleteModal.hide();
+                if (data.status === 'success') {
+                    location.reload();
+                } else {
+                    const errorMessage = data.message || 'Agent silinərkən xəta baş verdi.';
+                    showErrorToast(errorMessage);
+                    console.error('Delete Error:', data);
+                }
+            })
+            .catch(error => {
+                console.error('Error details:', error);
+                deleteModal.hide();
+                let errorMessage = 'Agent silinərkən xəta baş verdi.';
+                
+                // Check if the error contains a response body
+                if (error.message && error.message.includes('body:')) {
+                    errorMessage = `Server xətası: ${error.message}`;
+                } else {
+                    errorMessage = `Şəbəkə xətası: ${error.message}`;
+                }
+                
+                showErrorToast(errorMessage);
+            });
+        }
+    });
+
+    // Helper function to show error toast
+    function showErrorToast(message) {
+        const toastHTML = `
+            <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11">
+                <div class="toast align-items-center text-white bg-danger border-0" role="alert" aria-live="assertive" aria-atomic="true" data-bs-delay="10000">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+        const toastElement = document.querySelector('.toast');
+        const toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    }
 
     // CSRF token'ı almak için yardımcı fonksiyon
     function getCookie(name) {
