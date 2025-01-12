@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container-fluid">
@@ -6,37 +7,108 @@
         <!-- Sol Sidebar -->
         <div class="col-md-3 col-xl-2 p-3 bg-dark sidebar-container">
             <div class="text-white">
-                <h4 class="text-center mb-4">{{ department.name }}</h4>
-                <div class="d-flex flex-md-column gap-2 justify-content-center">
-                    <!-- <a href="{% url 'edit_department' department.pk %}" class="btn btn-warning btn-sm">
-                        <i class="fas fa-edit"></i> <span class="d-none d-md-inline">Departmanı Düzenle</span>
-                    </a>
-                    <a href="{% url 'delete_department' department.pk %}" class="btn btn-danger btn-sm">
-                        <i class="fas fa-trash"></i> <span class="d-none d-md-inline">Departmanı Sil</span>
-                    </a> -->
-                    <a href="{% url 'department_list' %}" class="btn btn-secondary btn-sm">
-                        <i class="fas fa-arrow-left"></i> <span class="d-none d-md-inline">Geri</span>
-                    </a>
-                </div>
+                <h4 class="text-center mb-4">Şöbə: {{ department.name }}</h4>
+                {% if user.is_superuser or user.departmenthead.department == department %}
+                    <div class="d-flex flex-md-column gap-2 justify-content-center">
+                        {% if user.is_superuser %}
+                        <a href="{% url 'department_list' %}" class="btn btn-secondary btn-sm">
+                                <i class="fas fa-arrow-left"></i> <span class="d-none d-md-inline">Geri</span>
+                        </a>
+                        {% endif %}
+                        {% if new_agents %}
+                        <button type="button" class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#newAgentsModal">
+                            <i class="fas fa-user-plus"></i> <span class="d-none d-md-inline">Yeni Agentlər ({{ new_agents|length }})</span>
+                        </button>
+                        {% endif %}
+                    </div>
+                {% endif %}
             </div>
         </div>
 
         <!-- Ana İçerik -->
         <div class="col-md-9 col-xl-10 p-3">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>Şöbənin Menecerləri</h2>
-                <a href="{% url 'department_add_manager' dept_pk=department.pk %}" class="btn btn-primary"> <i class="fas fa-plus"></i> Yeni Menecer Əlavə Edin</a>
-            </div>
-
-            {% if messages %}
-                {% for message in messages %}
-                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <!-- Şöbə Müdürü Section -->
+            {% if department_head or user.is_superuser %}
+            <div class="row justify-content-center mb-4">
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">Şöbə Müdürü</h4>
+                            {% if user.is_superuser and not department_head %}
+                                <a href="{% url 'add_department_head' dept_pk=department.id %}" class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus"></i> Əlavə Et
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="card-body text-center">
+                            {% if department_head %}
+                                <div class="position-relative mb-3">
+                                    {% if department_head.photo %}
+                                        <img src="{{ department_head.photo.url }}" 
+                                             alt="{{ department_head.name }}" 
+                                             class="rounded-circle"
+                                             style="width: 100px; height: 100px; object-fit: cover;">
+                                    {% else %}
+                                        <div class="rounded-circle bg-primary d-flex align-items-center justify-content-center text-white mx-auto" 
+                                             style="width: 100px; height: 100px;">
+                                            <i class="fas fa-user-tie fa-3x"></i>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                <h5 class="mb-1">{{ department_head.name }} {{ department_head.surname }}</h5>
+                                <p class="text-muted">Şöbə Müdürü</p>
+                                {% if user.is_superuser %}
+                                    <div class="d-flex justify-content-center gap-2 mt-3">
+                                        <a href="{% url 'edit_department_head' dept_pk=department.id head_pk=department_head.id %}" class="btn btn-warning w-100">
+                                            <i class="fas fa-edit"></i> Düzəlt
+                                        </a>
+                                        <a href="#" class="btn btn-danger w-100" onclick="setupDepartmentHeadDelete('{% url 'delete_department_head' dept_pk=department.id head_pk=department_head.id %}')" data-bs-toggle="modal" data-bs-target="#deleteDepartmentHeadModal">
+                                            <i class="fas fa-trash"></i> Sil
+                                        </a>
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <p class="text-muted mb-0">Bu şöbənin müdürü təyin edilməyib.</p>
+                            {% endif %}
+                        </div>
                     </div>
-                {% endfor %}
+                    <!-- Şöbə Müdürü ilə bağlı mesajlar -->
+                    {% for message in messages %}
+                        {% if 'şöbə müdürü' in message.message|lower %}
+                            <div class="alert alert-{{ message.tags }} mt-3">
+                                {{ message|linebreaksbr }}
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
             {% endif %}
 
+            <div class="row mb-4">
+                <div class="col-md-8">
+                    <h2 class="mb-0">Şöbənin Menecerləri</h2>
+                </div>
+                <div class="col-md-4 text-md-end">
+                    {% if user.is_superuser or user.departmenthead.department == department %}
+                        <a href="{% url 'department_add_manager' dept_pk=department.pk %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Yeni Menecer Əlavə Edin
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <!-- Manager ilə bağlı mesajlar -->
+                {% for message in messages %}
+                    {% if 'menecer' in message.message|lower %}
+                        <div class="alert alert-{{ message.tags }} mt-3">
+                            {{ message|linebreaksbr }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if managers %}
             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
                 {% for manager in managers %}
                 <div class="col">
@@ -64,71 +136,34 @@
                             <h5 class="mb-1">{{ manager.name }}</h5>
                             <p class="text-muted mb-3">{{ manager.surname }}</p>
                             <div class="d-grid gap-2">
-                                <a href="{% url 'manager_detail' department.pk manager.pk %}" class="btn btn-info">
+                                <a href="{% url 'manager_detail' dept_pk=department.id manager_pk=manager.id %}" class="btn btn-info">
                                     <i class="fas fa-eye"></i> Detallar
                                 </a>
-                                <a href="{% url 'edit_manager' department.pk manager.pk %}" class="btn btn-warning">
-                                    <i class="fas fa-edit"></i> Düzəliş Et
-                                </a>
-                                <a href="#" class="btn btn-danger" 
-                                    onclick="setupManagerDelete('{% url 'delete_manager' department.pk manager.pk %}')"
-                                    data-bs-toggle="modal" 
-                                    data-bs-target="#deleteManagerModal">
-                                    <i class="fas fa-trash"></i> Sil
-                                </a>
+                                {% if user.is_superuser or user.departmenthead.department == department %}
+                                    <a href="{% url 'edit_manager' dept_pk=department.id manager_pk=manager.id %}" class="btn btn-warning">
+                                        <i class="fas fa-edit"></i> Düzəliş Et
+                                    </a>
+                                    <a href="#" class="btn btn-danger" 
+                                        onclick="setupManagerDelete('{% url 'delete_manager' dept_pk=department.id manager_pk=manager.id %}')"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteManagerModal">
+                                        <i class="fas fa-trash"></i> Sil
+                                    </a>
+                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
-                {% empty %}
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle fa-3x mb-3"></i>
-                        <h4>Bu şöbədə hələ ki, menecer yoxdur.</h4>
-                    </div>
-                </div>
                 {% endfor %}
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- Modal -->
-<div class="modal fade" id="addManagerModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{ department.name }} - Yeni Menecer Əlavə Edin</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            {% else %}
+            <div class="alert alert-info">
+                <div class="text-center">
+                    <i class="fas fa-info-circle fa-2x mb-3"></i>
+                    <h5 class="mb-0">Bu şöbədə hələ heç bir menecer yoxdur.</h5>
+                </div>
             </div>
-            <div class="modal-body">
-                <form method="post">
-                    {% csrf_token %}
-                    <div class="mb-3">
-                        <label for="{{ form.name.id_for_label }}" class="form-label">Ad</label>
-                        {{ form.name }}
-                        {% if form.name.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.name.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="mb-3">
-                        <label for="{{ form.surname.id_for_label }}" class="form-label">Soyad</label>
-                        {{ form.surname }}
-                        {% if form.surname.errors %}
-                            <div class="invalid-feedback d-block">
-                                {{ form.surname.errors }}
-                            </div>
-                        {% endif %}
-                    </div>
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-save"></i> Saxla
-                        </button>
-                    </div>
-                </form>
-            </div>
+            {% endif %}
         </div>
     </div>
 </div>
@@ -156,11 +191,274 @@
     </div>
 </div>
 
+<!-- Delete Department Head Modal -->
+<div class="modal fade" id="deleteDepartmentHeadModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">Şöbə Müdürünü Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu şöbə müdürünü silmək istədiyinizə əminsiniz?</p>
+                <p class="text-danger"><small>Bu əməliyyat geri qaytarıla bilməz!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                <form id="deleteDepartmentHeadForm" method="POST" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- New Agents Modal -->
+<div class="modal fade" id="newAgentsModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yeni Agentləri Təyin Et</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Agent</th>
+                                <th>Menecer</th>
+                                <th>Əməliyyat</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for agent in new_agents %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        {% if agent.photo %}
+                                        <img src="{{ agent.photo.url }}" 
+                                             alt="{{ agent.name }}" 
+                                             class="rounded-circle"
+                                             style="width: 40px; height: 40px; object-fit: cover;">
+                                        {% else %}
+                                        <div class="rounded-circle bg-secondary bg-opacity-10 d-flex align-items-center justify-content-center"
+                                             style="width: 40px; height: 40px;">
+                                            <i class="fas fa-user text-secondary"></i>
+                                        </div>
+                                        {% endif %}
+                                        <div>
+                                            <div class="fw-bold">{{ agent.name }} {{ agent.surname }}</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <select class="form-select manager-select" data-agent-id="{{ agent.id }}">
+                                        <option value="">Menecer seçin</option>
+                                        {% for manager in managers %}
+                                            <option value="{{ manager.id }}">{{ manager.name }} {{ manager.surname }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-primary assign-manager-btn" data-agent-id="{{ agent.id }}">
+                                            Təyin et
+                                        </button>
+                                        <button type="button" class="btn btn-danger mark-didnt-come-btn" data-agent-id="{{ agent.id }}" title="İşə gəlmədi">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Bağla</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add this new modal for "İşə gəlmədi" confirmation -->
+<div class="modal fade" id="didntComeConfirmModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">İşə Gəlmədi Təsdiqi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bu agentin statusunu "İşə gəlmədi" olaraq dəyişdirmək istədiyinizə əminsiniz?</p>
+                <p class="text-danger"><small>Bu əməliyyat geri qaytarıla bilməz!</small></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Ləğv et</button>
+                <button type="button" class="btn btn-danger" id="confirmDidntCome">Təsdiq et</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript -->
 <script>
 function setupManagerDelete(url) {
     document.getElementById('deleteManagerForm').action = url;
 }
+
+function setupDepartmentHeadDelete(url) {
+    document.getElementById('deleteDepartmentHeadForm').action = url;
+}
+
+// CSRF token için yardımcı fonksiyon
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Manager assignment functionality
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.manager-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const agentId = this.dataset.agentId;
+            const assignBtn = document.querySelector(`.assign-manager-btn[data-agent-id="${agentId}"]`);
+            assignBtn.disabled = !this.value;
+        });
+    });
+
+    document.querySelectorAll('.assign-manager-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const agentId = this.dataset.agentId;
+            const managerId = document.querySelector(`.manager-select[data-agent-id="${agentId}"]`).value;
+            
+            const formData = new FormData();
+            formData.append('agent_id', agentId);
+            formData.append('manager_id', managerId);
+            
+            fetch("{% url 'assign_manager' %}", {
+                method: 'POST',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    // Remove the row from the table
+                    const row = this.closest('tr');
+                    row.remove();
+                    
+                    // If no more agents, close modal and refresh page
+                    if (document.querySelectorAll('.assign-manager-btn').length === 0) {
+                        document.querySelector('#newAgentsModal').querySelector('.btn-close').click();
+                        window.location.reload();
+                    }
+                } else {
+                    alert('Xəta baş verdi: ' + (data.message || 'Bilinməyən xəta'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Xəta baş verdi!');
+            });
+        });
+    });
+
+    // Update the "İşə gəlmədi" functionality
+    document.querySelectorAll('.mark-didnt-come-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const agentId = this.dataset.agentId;
+            const confirmModal = new bootstrap.Modal(document.getElementById('didntComeConfirmModal'));
+            const confirmButton = document.getElementById('confirmDidntCome');
+            
+            // Store the button reference for later use
+            confirmButton.dataset.agentId = agentId;
+            
+            confirmModal.show();
+        });
+    });
+
+    // Handle confirmation button click
+    document.getElementById('confirmDidntCome').addEventListener('click', function() {
+        const agentId = this.dataset.agentId;
+        const modal = bootstrap.Modal.getInstance(document.getElementById('didntComeConfirmModal'));
+        const csrftoken = getCookie('csrftoken');
+        
+        const formData = new FormData();
+        formData.append('agent_id', agentId);
+        
+        fetch('{% url "mark_agent_didnt_come" %}', {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrftoken
+            },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                // Close the confirmation modal
+                modal.hide();
+                
+                // Remove the agent's row from the table
+                const row = document.querySelector(`.mark-didnt-come-btn[data-agent-id="${agentId}"]`).closest('tr');
+                row.remove();
+                
+                // Show success message
+                const successAlert = document.createElement('div');
+                successAlert.className = 'alert alert-success';
+                successAlert.textContent = 'Agent statusu uğurla yeniləndi.';
+                document.querySelector('#newAgentsModal .modal-body').insertBefore(successAlert, document.querySelector('#newAgentsModal .table-responsive'));
+                
+                // Remove the alert after 3 seconds
+                setTimeout(() => successAlert.remove(), 3000);
+                
+                // If no more agents, close modal and refresh page
+                if (document.querySelectorAll('.mark-didnt-come-btn').length === 0) {
+                    document.querySelector('#newAgentsModal .btn-close').click();
+                    window.location.reload();
+                }
+            } else {
+                throw new Error(data.error || 'Bilinməyən xəta');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            const errorAlert = document.createElement('div');
+            errorAlert.className = 'alert alert-danger';
+            errorAlert.textContent = 'Xəta baş verdi: ' + error.message;
+            document.querySelector('#newAgentsModal .modal-body').insertBefore(errorAlert, document.querySelector('#newAgentsModal .table-responsive'));
+            
+            // Remove the error alert after 3 seconds
+            setTimeout(() => errorAlert.remove(), 3000);
+            
+            // Close the confirmation modal
+            modal.hide();
+        });
+    });
+});
 </script>
 
 <style>
@@ -171,17 +469,29 @@ function setupManagerDelete(url) {
     z-index: 100;
 }
 
-.hover-card {
-    transition: transform 0.2s ease-in-out;
+.card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.hover-card:hover {
+.card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
 .btn-sm {
     padding: 0.25rem 0.5rem;
     font-size: 0.875rem;
+}
+
+/* Badge stilleri */
+.badge {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.75rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge i {
+    font-size: 0.8rem;
 }
 
 /* Mobil cihazlar için özel stiller */
@@ -190,10 +500,6 @@ function setupManagerDelete(url) {
         min-height: auto !important;
         background: rgba(33, 37, 41, 0.95) !important;
         backdrop-filter: blur(10px);
-    }
-    
-    .hover-card {
-        transform: none !important;
     }
     
     .card {
@@ -213,40 +519,7 @@ function setupManagerDelete(url) {
     /* Mobilde sidebar başlığını küçült */
     .sidebar-container h4 {
         font-size: 1.2rem;
-        margin-bottom: 1rem !important;
     }
-}
-
-/* Masaüstü için özel stiller */
-@media (min-width: 768px) {
-    .sidebar-container {
-        min-height: 100vh;
-    }
-
-    .sidebar-container .d-flex {
-        flex-direction: column !important;
-    }
-}
-
-/* Badge stilleri */
-.badge {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.75rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.badge i {
-    font-size: 0.8rem;
-}
-
-/* Card hover efekti */
-.card {
-    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-}
-
-.card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 </style>
 {% endblock %}
