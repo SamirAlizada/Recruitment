@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ department.name }} Şöbəsi</h2>
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h4>Menecerlər</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Ad</th>
+                            <th>Soyad</th>
+                            <th>Agent Sayı</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for manager in managers %}
+                        <tr>
+                            <td>{{ manager.name }}</td>
+                            <td>{{ manager.surname }}</td>
+                            <td>{{ manager.agent_set.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4>Agentlər</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Ad</th>
+                            <th>Soyad</th>
+                            <th>FIN</th>
+                            <th>Status</th>
+                            <th>Menecer</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for agent in agents %}
+                        <tr>
+                            <td>{{ agent.name }}</td>
+                            <td>{{ agent.surname }}</td>
+                            <td>{{ agent.fin }}</td>
+                            <td>{{ agent.status }}</td>
+                            <td>{{ agent.manager.name }} {{ agent.manager.surname }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
